@@ -52,12 +52,14 @@
                     start: e.start_time,
                     end: e.end_time,
                     // title: e.venue.name,
-                    title:e.artist.name + ' @ ' + e.venue.name,
+                    title: e.artist.name + ' @ ' + e.venue.name,
                     resourceId: e.artist.id,
                     description: e.venue.description,
-                    latitude: e.venue.latitude,
-                    longitude: e.venue.longitude,
-                    artist: e.artist
+                    // latitude: e.venue.latitude,
+                    // longitude: e.venue.longitude,
+                    artist: e.artist,
+                    url: 'https://www.google.com/maps/dir/?api=1&destination=' + e.venue
+                        .latitude + ',' + e.venue.longitude
                 });
             });
 
@@ -73,9 +75,14 @@
             var resources = [];
 
             events.forEach(event => {
-                if (!resources.find( ({id}) => id == event.artist.id ))
-                {
-                    resources.push({id: event.artist.id, title: event.artist.name, description: event.artist.description});
+                if (!resources.find(({
+                        id
+                    }) => id == event.artist.id)) {
+                    resources.push({
+                        id: event.artist.id,
+                        title: event.artist.name,
+                        description: event.artist.description
+                    });
                 }
             })
 
@@ -103,59 +110,65 @@
                 slotHeight: 50,
                 slotWidth: 200,
                 resources: resources,
-                resourceColumns: [
-                    {
-                        labelText: 'Artist',
-                        field: 'title'
-                    }
-                ],
+                resourceColumns: [{
+                    labelText: 'Artist',
+                    field: 'title'
+                }],
                 events: events,
 
-                eventRender: function(info) {
-                    var tooltip = new Tooltip(info.el, {
-                    title: info.event.extendedProps.description,
-                    placement: 'top',
-                    trigger: 'hover',
-                    container: 'body'
-                    });
+                eventClick: function (info) {
+                    info.jsEvent.preventDefault(); // don't let the browser navigate
 
-                    if (info.event.extendedProps.latitude && info.event.extendedProps.longitude) {
-
-                    var mapPin = document.createElement('i');
-                    mapPin.className = 'fa fa-map-marker';
-                    mapPin.style = 'color: white';
-                    mapPin.setAttribute('aria-hidden', true);
-
-                    var directionsLink = document.createElement('a');
-                    directionsLink.setAttribute('href', 'https://www.google.com/maps/dir/?api=1&destination=' + info.event.extendedProps.latitude + ',' + info.event.extendedProps.longitude);
-                    directionsLink.setAttribute('target', '_blank');
-
-                    directionsLink.appendChild(mapPin);
-
-                    var spacer = document.createElement('strong');
-                    spacer.innerText = ' | ';
-
-                    info.el.querySelector('.fc-title')
-                    .appendChild(spacer)
-                    .appendChild(directionsLink);
-
+                    if (info.event.url) {
+                        window.open(info.event.url);
                     }
-
-                    // var mapPin = document.createElement('i');
-                    // // questionMark.innerText = ' (?) ';
-                    // mapPin.className = 'fa fa-directions';
-
-                    // // var info = document.createElement('i');
-                    // // info.className = 'fa fa-info';
-                    // // info.setAttribute('aria-hidden', true);
-
-                    // var spacer = document.createElement('strong');
-                    // spacer.innerText = '  ';
-
-                    // info.el.querySelector('.fc-title-wrap')
-                    //     .appendChild(spacer)
-                    //     .appendChild(mapPin);
                 },
+
+                // eventRender: function(info) {
+                //     var tooltip = new Tooltip(info.el, {
+                //     title: info.event.extendedProps.description,
+                //     placement: 'top',
+                //     trigger: 'hover',
+                //     container: 'body'
+                //     });
+
+                //     if (info.event.extendedProps.latitude && info.event.extendedProps.longitude) {
+
+                //     var mapPin = document.createElement('i');
+                //     mapPin.className = 'fa fa-map-marker';
+                //     mapPin.style = 'color: white';
+                //     mapPin.setAttribute('aria-hidden', true);
+
+                //     var directionsLink = document.createElement('a');
+                //     directionsLink.setAttribute('href', 'https://www.google.com/maps/dir/?api=1&destination=' + info.event.extendedProps.latitude + ',' + info.event.extendedProps.longitude);
+                //     directionsLink.setAttribute('target', '_blank');
+
+                //     directionsLink.appendChild(mapPin);
+
+                //     var spacer = document.createElement('strong');
+                //     spacer.innerText = ' | ';
+
+                //     info.el.querySelector('.fc-title')
+                //     .appendChild(spacer)
+                //     .appendChild(directionsLink);
+
+                //     }
+
+                // var mapPin = document.createElement('i');
+                // // questionMark.innerText = ' (?) ';
+                // mapPin.className = 'fa fa-directions';
+
+                // // var info = document.createElement('i');
+                // // info.className = 'fa fa-info';
+                // // info.setAttribute('aria-hidden', true);
+
+                // var spacer = document.createElement('strong');
+                // spacer.innerText = '  ';
+
+                // info.el.querySelector('.fc-title-wrap')
+                //     .appendChild(spacer)
+                //     .appendChild(mapPin);
+                // },
 
                 resourceRender: function (info) {
                     var questionMark = document.createElement('i');
@@ -175,25 +188,28 @@
 
                     var desc = '';
 
-                    
+
 
                     var tooltip = new Tooltip(questionMark, {
-                        title: function() {
+                        title: function () {
                             var rawHtml = '';
                             //info.resource.extendedProps.description
                             if (info.resource.extendedProps.image_url) {
                                 var imageDiv = document.createElement('div');
                                 //imageDiv.style = "height: 100px";
                                 var image = document.createElement('img');
-                                image.setAttribute('src', info.resource.extendedProps.image_url);
-                                image.style = 'max-height: 100%; max-width: 100%';
+                                image.setAttribute('src', info.resource
+                                    .extendedProps.image_url);
+                                image.style =
+                                    'max-height: 100%; max-width: 100%';
 
                                 imageDiv.appendChild(image);
 
                                 rawHtml = imageDiv.outerHTML + '<br>';
                             }
                             if (info.resource.extendedProps.description) {
-                                rawHtml = rawHtml + info.resource.extendedProps.description;
+                                rawHtml = rawHtml + info.resource.extendedProps
+                                    .description;
                             }
 
                             return rawHtml;
@@ -219,8 +235,8 @@
                         spacer.innerText = ' | ';
 
                         info.el.querySelector('.fc-cell-text')
-                        .appendChild(spacer)
-                        .appendChild(link);
+                            .appendChild(spacer)
+                            .appendChild(link);
                     }
 
                     if (info.resource.extendedProps.facebook_url) {
@@ -238,8 +254,8 @@
                         spacer.innerText = ' | ';
 
                         info.el.querySelector('.fc-cell-text')
-                        .appendChild(spacer)
-                        .appendChild(link);
+                            .appendChild(spacer)
+                            .appendChild(link);
                     }
 
                     if (info.resource.extendedProps.instagram_url) {
@@ -248,7 +264,8 @@
                         icon.setAttribute('aria-hidden', true);
 
                         var link = document.createElement('a');
-                        link.setAttribute('href', info.resource.extendedProps.instagram_url);
+                        link.setAttribute('href', info.resource.extendedProps
+                        .instagram_url);
                         link.setAttribute('target', '_blank');
 
                         link.appendChild(icon);
@@ -257,8 +274,8 @@
                         spacer.innerText = ' | ';
 
                         info.el.querySelector('.fc-cell-text')
-                        .appendChild(spacer)
-                        .appendChild(link);
+                            .appendChild(spacer)
+                            .appendChild(link);
                     }
 
                     if (info.resource.extendedProps.soundcloud_url) {
@@ -267,7 +284,8 @@
                         icon.setAttribute('aria-hidden', true);
 
                         var link = document.createElement('a');
-                        link.setAttribute('href', info.resource.extendedProps.soundcloud_url);
+                        link.setAttribute('href', info.resource.extendedProps
+                            .soundcloud_url);
                         link.setAttribute('target', '_blank');
 
                         link.appendChild(icon);
@@ -276,8 +294,8 @@
                         spacer.innerText = ' | ';
 
                         info.el.querySelector('.fc-cell-text')
-                        .appendChild(spacer)
-                        .appendChild(link);
+                            .appendChild(spacer)
+                            .appendChild(link);
                     }
 
                     if (info.resource.extendedProps.twitter_url) {
@@ -295,8 +313,8 @@
                         spacer.innerText = ' | ';
 
                         info.el.querySelector('.fc-cell-text')
-                        .appendChild(spacer)
-                        .appendChild(link);
+                            .appendChild(spacer)
+                            .appendChild(link);
                     }
 
                     if (info.resource.extendedProps.youtube_url) {
@@ -314,8 +332,8 @@
                         spacer.innerText = ' | ';
 
                         info.el.querySelector('.fc-cell-text')
-                        .appendChild(spacer)
-                        .appendChild(link);
+                            .appendChild(spacer)
+                            .appendChild(link);
                     }
                 }
             });
