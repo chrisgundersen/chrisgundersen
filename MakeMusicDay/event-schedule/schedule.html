@@ -51,8 +51,8 @@
                 events.push({
                     start: e.start_time,
                     end: e.end_time,
-                    title: e.venue.name,
-                    // title:e.artist.name + ' @ ' + e.venue.name,
+                    // title: e.venue.name,
+                    title:e.artist.name + ' @ ' + e.venue.name,
                     resourceId: e.artist.id,
                     description: e.venue.description,
                     latitude: e.venue.latitude,
@@ -89,15 +89,16 @@
                 defaultView: 'resourceTimelineDay',
                 // defaultView: 'timelineDay',
                 defaultDate: '2020-06-21',
-                // displayEventTime: true,
+                displayEventTime: true,
                 eventOrder: 'start',
                 eventTimeFormat: {
                     hour: 'numeric',
                     minute: '2-digit',
-                    meridiem: false
+                    meridiem: 'narrow'
                 },
                 eventBackgroundColor: '#f15a22',
                 eventBorderColor: '#000000',
+                header: '',
                 minTime: firstTime + ':00:00',
                 slotHeight: 50,
                 slotWidth: 200,
