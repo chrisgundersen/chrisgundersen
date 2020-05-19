@@ -33,39 +33,51 @@
             datatype: "json"
         }).done(function (response) {
             // Parse response into resource and event objects for FullCalendar
-            var resources = [];
+            // var resources = [];
             var events = [];
             $.each(response.events, function (idx, e) {
-                resources.push({
-                    id: e.artist.name,
-                    title: e.artist.name,
-                    description: e.artist.description,
-                    facebook_url: e.artist.facebook_url,
-                    image_url: e.artist.image_url,
-                    instagram_url: e.artist.instagram_url,
-                    soundcloud_url: e.artist.soundcloud_url,
-                    twitter_url: e.artist.twitter_url,
-                    url: e.artist.url,
-                    youtube_url: e.artist.youtube_url
-                });
+                // resources.push({
+                //     id: e.artist.name,
+                //     title: e.artist.name,
+                //     description: e.artist.description,
+                //     facebook_url: e.artist.facebook_url,
+                //     image_url: e.artist.image_url,
+                //     instagram_url: e.artist.instagram_url,
+                //     soundcloud_url: e.artist.soundcloud_url,
+                //     twitter_url: e.artist.twitter_url,
+                //     url: e.artist.url,
+                //     youtube_url: e.artist.youtube_url
+                // });
                 events.push({
                     start: e.start_time,
                     end: e.end_time,
                     title: e.venue.name,
-                    resourceId: e.artist.name,
+                    // title:e.artist.name + ' @ ' + e.venue.name,
+                    resourceId: e.artist.id,
                     description: e.venue.description,
                     latitude: e.venue.latitude,
-                    longitude: e.venue.longitude
+                    longitude: e.venue.longitude,
+                    artist: e.artist
                 });
             });
 
-            resources = resources.sort((a, b) => (a.title > b.title) ? 1 : -1)
+            // resources = resources.sort((a, b) => (a.title > b.title) ? 1 : -1)
 
             events = events.sort((a, b) => (a.start > b.start) ? 1 : -1)
+            var firstEvent = events[0];
 
-            var firstTime = events[0].start.toString().substring(11, 13);
+            var firstTime = firstEvent.start.toString().substring(11, 13);
 
             var calendarEl = document.getElementById('calendar');
+
+            var resources = [];
+
+            events.forEach(event => {
+                if (!resources.find( ({id}) => id == event.artist.id ))
+                {
+                    resources.push({id: event.artist.id, title: event.artist.name, description: event.artist.description});
+                }
+            })
 
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 plugins: ['resourceTimeline'],
@@ -75,9 +87,10 @@
                 //     right: 'resourceTimelineDay,resourceTimelineWeek'
                 // },
                 defaultView: 'resourceTimelineDay',
-                //resources: 'https://fullcalendar.io/demo-resources.json',
+                // defaultView: 'timelineDay',
                 defaultDate: '2020-06-21',
-                displayEventTime: true,
+                // displayEventTime: true,
+                eventOrder: 'start',
                 eventTimeFormat: {
                     hour: 'numeric',
                     minute: '2-digit',
@@ -86,7 +99,8 @@
                 eventBackgroundColor: '#f15a22',
                 eventBorderColor: '#000000',
                 minTime: firstTime + ':00:00',
-                slotWidth: 150,
+                slotHeight: 50,
+                slotWidth: 200,
                 resources: resources,
                 resourceColumns: [
                     {
@@ -108,6 +122,7 @@
 
                     var mapPin = document.createElement('i');
                     mapPin.className = 'fa fa-map-marker';
+                    mapPin.style = 'color: white';
                     mapPin.setAttribute('aria-hidden', true);
 
                     var directionsLink = document.createElement('a');
@@ -119,7 +134,7 @@
                     var spacer = document.createElement('strong');
                     spacer.innerText = ' | ';
 
-                    info.el.querySelector('.fc-title-wrap')
+                    info.el.querySelector('.fc-title')
                     .appendChild(spacer)
                     .appendChild(directionsLink);
 

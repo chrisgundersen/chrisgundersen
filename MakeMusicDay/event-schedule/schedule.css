@@ -11,9 +11,27 @@ body {
     margin: 20px auto;
 }
 
-/* .fc-event { 
-    height: 10em; 
-} */
+.fc-event {
+    height: 5em;
+}
+
+.fc-timeline-event .fc-time,
+.fc-timeline-event .fc-title {
+    display: inline-block;
+    vertical-align: top;
+    max-width: 100%;
+    padding: 0 2px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    white-space: normal;
+    overflow: hidden;
+}
+
+.fc-right .fc-prev-button, .fc-right .fc-next-button, .fc-today-button {
+    background-color: #f15a22;
+    background-image: none;
+}
 
 /*
 i wish this required CSS was better documented :(
