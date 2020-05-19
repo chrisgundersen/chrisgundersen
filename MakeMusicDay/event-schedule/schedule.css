@@ -15,17 +15,8 @@ body {
     height: 5em;
 }
 
-.fc-timeline-event .fc-time,
-.fc-timeline-event .fc-title {
-    display: inline-block;
-    vertical-align: top;
-    max-width: 100%;
-    padding: 0 2px;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    white-space: normal;
-    overflow: hidden;
+.fc-timeline .fc-body .fc-scroller {
+ height: 600px  !important;
 }
 
 .fc-right .fc-prev-button, .fc-right .fc-next-button, .fc-today-button {
