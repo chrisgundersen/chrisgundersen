@@ -7,11 +7,14 @@
         src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script data-require="moment.js@*" data-semver="2.14.1" src="https://npmcdn.com/moment@2.14.1"></script>
     <script src="https://unpkg.com/@fullcalendar/core@4.4.0/main.min.js"></script>
+    <script src="https://unpkg.com/@fullcalendar/interaction@4.4.0/main.min.js"></script>
     <script src="https://unpkg.com/@fullcalendar/timeline@4.4.0/main.min.js"></script>
     <script src="https://unpkg.com/@fullcalendar/resource-common@4.4.0/main.min.js"></script>
     <script src="https://unpkg.com/@fullcalendar/resource-timeline@4.4.0/main.min.js"></script>
     <script src="https://unpkg.com/popper.js/dist/umd/popper.min.js"></script>
     <script src="https://unpkg.com/tooltip.js/dist/umd/tooltip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.31/moment-timezone-with-data-10-year-range.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/moment-timezone/main.min.js"></script>
 
     <!-- CSS Styles -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
@@ -22,12 +25,46 @@
 </head>
 
 <body>
-    <div id="genres"></div>
-    <div id='calendar'></div>
+    <!-- <div id="genres"></div>
+    <div id='calendar'></div> -->
+
+    <div id='top'>
+
+        <div style='float:left'>
+          Timezone:
+          <select id='time-zone-selector'>
+            <option value='America/New_York'>Eastern Time (America/New York)</option>
+            <option value='America/Chicago'>Central Time (America/Chicago)</option>
+            <option value='America/Denver'>Mountain Time (America/Denver)</option>
+            <option value='America/Los_Angeles'>Pacific Time (America/Los Angeles)</option>
+            <!-- <option value='UTC'>UTC</option> -->
+          </select>
+        </div>
+      
+        <div style='float:right'>
+          <span id='loading'>loading...</span>
+      
+        </div>
+      
+        <div style='clear:both'></div>
+      </div>
+      
+      <div id='calendar'></div>
 </body>
 
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function () {
+        var timeZoneSelectorEl = document.getElementById('time-zone-selector');
+        var params = new URLSearchParams(window.location.search);
+        // var b = moment.utc("2013-11-18 11:55").tz("America/Toronto");
+
+        var timeZoneGuess = moment.tz.guess();
+
+        var timeZoneGuessOption = document.createElement('option');
+        timeZoneGuessOption.text = 'Your local timezone (best guess: "' + timeZoneGuess + '"';
+        timeZoneGuessOption.selected = true;
+        timeZoneSelectorEl.add(timeZoneGuessOption);
+
         $.ajax({
             url: "https://ny.makemusic.dev/api/cities/events/simple",
             method: "GET",
@@ -55,8 +92,8 @@
                 //     youtube_url: e.artist.youtube_url
                 // });
                 events.push({
-                    start: e.start_time,
-                    end: e.end_time,
+                    start: e.utc_start_time,
+                    end: e.utc_end_time,
                     // title: e.venue.name,
                     title: e.artist.name + ' @ ' + e.venue.name,
                     resourceId: e.artist.id,
@@ -74,27 +111,25 @@
 
             var genreDiv = document.getElementById("genres");
 
-for (var i = 0; i < musicGenres.length; i++) {
-    var checkBox = document.createElement("input");
-    var label = document.createElement("label");
-    checkBox.type = "checkbox";
-    label.innerHTML = musicGenres[i].replace(/_/gi, '/');
-    label.setAttribute('for', musicGenres[i]);
-    checkBox.id = musicGenres[i];
-    checkBox.name = 'genre';
-    checkBox.value = musicGenres[i];
-    checkBox.checked = true;
-    genreDiv.appendChild(checkBox);
-    genreDiv.appendChild(label);
-    // label.appendChild(document.createTextNode(musicGenres[i]));
-}
+// for (var i = 0; i < musicGenres.length; i++) {
+//     var checkBox = document.createElement("input");
+//     var label = document.createElement("label");
+//     checkBox.type = "checkbox";
+//     label.innerHTML = musicGenres[i].replace(/_/gi, '/');
+//     label.setAttribute('for', musicGenres[i]);
+//     checkBox.id = musicGenres[i];
+//     checkBox.name = 'genre';
+//     checkBox.value = musicGenres[i];
+//     checkBox.checked = true;
+//     genreDiv.appendChild(checkBox);
+//     genreDiv.appendChild(label);
+//     // label.appendChild(document.createTextNode(musicGenres[i]));
+// }
 
             events = events.sort((a, b) => (a.start > b.start) ? 1 : -1)
             var firstEvent = events[0];
 
             var firstTime = firstEvent.start.toString().substring(11, 13);
-
-            var currentYear = new Date().getFullYear();
 
             var calendarEl = document.getElementById('calendar');
 
@@ -107,13 +142,14 @@ for (var i = 0; i < musicGenres.length; i++) {
                     resources.push({
                         id: event.artist.id,
                         title: event.artist.name,
-                        description: event.artist.description
+                        description: event.artist.description,
+                        image_url: event.artist.image_url
                     });
                 }
             })
 
             var calendar = new FullCalendar.Calendar(calendarEl, {
-                plugins: ['resourceTimeline'],
+                plugins: ['resourceTimeline', 'momentTimezone' ],
                 // header: {
                 //     left: 'today prev,next',
                 //     center: 'title',
@@ -121,20 +157,29 @@ for (var i = 0; i < musicGenres.length; i++) {
                 // },
                 defaultView: 'resourceTimelineDay',
                 // defaultView: 'timelineDay',
-                defaultDate: currentYear + '-06-21',
+                defaultDate: '2020-06-21',
                 displayEventTime: true,
                 eventOrder: 'start',
                 eventTimeFormat: {
                     hour: 'numeric',
                     minute: '2-digit',
-                    meridiem: 'narrow'
+                    meridiem: 'narrow',
+                    timeZoneName: 'short'
                 },
                 eventBackgroundColor: '#f15a22',
                 eventBorderColor: '#000000',
                 header: '',
-                minTime: firstTime + ':00:00',
+                loading: function(bool) {
+                    if (bool) {
+                        loadingEl.style.display = 'inline'; // show
+                    } else {
+                        loadingEl.style.display = 'none'; // hide
+                    }
+                },
+                // minTime: firstTime + ':00:00',
                 slotHeight: 50,
                 slotWidth: 200,
+                timeZone: timeZoneGuess,
                 resources: resources,
                 resourceAreaWidth: '20%',
                 resourceColumns: [{
@@ -200,8 +245,70 @@ for (var i = 0; i < musicGenres.length; i++) {
                 resourceRender: function (info) {
                     info.el.querySelector('.fc-cell-text').innerHTML = '';
 
+                    var artistProfileDiv = document.createElement('div');
+                    artistProfileDiv.id = 'artist-profile';
 
+                    info.el.querySelector('.fc-cell-text').appendChild(artistProfileDiv);
 
+                    if (info.resource.extendedProps.image_url) {
+                        var artistProfileImageDiv = document.createElement('div');
+                        artistProfileImageDiv.id = 'artist-profile-image';
+                        artistProfileImageDiv.style = 'background-image: url(' + info.resource.extendedProps.image_url + ');'
+                        // artistProfileImageDiv.style = 'height: 100px'
+
+                        // var artistProfileImagePositioner = document.createElement('div');
+                        // artistProfileImagePositioner.id = 'artist-profile-image-positioner';
+
+                        // var artistProfileImage = document.createElement('img');
+                        // artistProfileImage.className = 'artist-profile-image-crop-square';
+                        // artistProfileImage.setAttribute('src', info.resource.extendedProps.image_url);
+                        // // artistProfileImage.style = 'max-height: 100%; max-width: 100%';
+                        // artistProfileImage.alt = info.resource.title;
+
+                        // artistProfileImagePositioner.appendChild(artistProfileImage);
+                        // artistProfileImageDiv.appendChild(artistProfileImagePositioner);
+                        artistProfileDiv.appendChild(artistProfileImageDiv);
+                    }
+
+                    var artistProfileDetailsDiv = document.createElement('div');
+                    artistProfileDetailsDiv.id = 'artist-profile-details';
+
+                    var artistName = document.createElement('h7');
+                    artistName.innerHTML = info.resource.title;
+
+                    artistProfileDetailsDiv.appendChild(artistName);
+
+                    if (info.resource.extendedProps.description)
+                    {
+                        var questionMark = document.createElement('i');
+                        // questionMark.innerText = ' (?) ';
+                        questionMark.className = 'fa fa-info';
+
+                        // var info = document.createElement('i');
+                        // info.className = 'fa fa-info';
+                        // info.setAttribute('aria-hidden', true);
+
+                        var spacer = document.createElement('strong');
+                        spacer.innerText = '  ';
+
+                        artistProfileDetailsDiv.appendChild(spacer)
+                            .appendChild(questionMark);
+
+                        var tooltip = new Tooltip(questionMark, {
+                            title: info.resource.extendedProps.description,
+                            html: true,
+                            placement: 'top',
+                            trigger: 'hover',
+                            container: 'body'
+                        });
+                    }
+
+                    // var artistDescription = document.createElement('p');
+                    // artistDescription.innerHTML = info.resource.extendedProps.description;
+
+                    
+                    
+                    artistProfileDiv.appendChild(artistProfileDetailsDiv);
 
                     // var questionMark = document.createElement('i');
                     // // questionMark.innerText = ' (?) ';
@@ -371,7 +478,14 @@ for (var i = 0; i < musicGenres.length; i++) {
             });
 
             calendar.render();
+
+            // when the timezone selector changes, dynamically change the calendar option
+            timeZoneSelectorEl.addEventListener('change', function() {
+                calendar.setOption('timeZone', this.value);
+            });
         });
+
+        
     });
 </script>
 
