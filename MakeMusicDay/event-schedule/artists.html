@@ -55,15 +55,51 @@
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function () {
         var timeZoneSelectorEl = document.getElementById('time-zone-selector');
+        var loadingEl = document.getElementById('loading');
         var params = new URLSearchParams(window.location.search);
         // var b = moment.utc("2013-11-18 11:55").tz("America/Toronto");
+        var currentYear = new Date().getFullYear();
+
+        var cities = [];
+
+        $.ajax({
+            url: "https://ny.makemusic.dev/api/cities",
+            method: "GET",
+            datatype: "json"
+        }).done(function (response) {
+            $.each(response, function (idx, e) {
+                cities.push({
+                    accent_color: e.accent_color,
+                    base_url: e.base_url,
+                    contact_us_url: e.contact_us_url,
+                    id: e.id,
+                    logo_url: e.logo_url,
+                    latitude: e.latitude,
+                    longitude: e.longitude,
+                    primary_button_color: e.primary_button_color,
+                    secondary_button_color: e.secondary_button_color,
+                    timezone: e.timezone,
+                    url: e.url
+                });
+            });
+        }).then(function () {
+            var selectedCityId = "09439b48-377b-469c-9a9c-a05b294d537e"; // Test city, will be overwritten if real param is supplied
+
+        if (params.has('cityId')) {
+            selectedCityId = params.get('cityId');
+        }
+
+        var selectedCity = cities.find( ({id}) => id === selectedCityId );
 
         var timeZoneGuess = moment.tz.guess();
 
         var timeZoneGuessOption = document.createElement('option');
-        timeZoneGuessOption.text = 'Your local timezone (best guess: "' + timeZoneGuess + '"';
+        timeZoneGuessOption.text = 'Your local timezone (best guess: "' + timeZoneGuess + '")';
         timeZoneGuessOption.selected = true;
         timeZoneSelectorEl.add(timeZoneGuessOption);
+
+        var musicGenres = [];
+        var events = [];
 
         $.ajax({
             url: "https://ny.makemusic.dev/api/cities/events/simple",
@@ -72,8 +108,7 @@
         }).done(function (response) {
             // Parse response into resource and event objects for FullCalendar
             // var resources = [];
-            var musicGenres = [];
-            var events = [];
+
             $.each(response.events, function (idx, e) {
                 e.artist.genres.forEach(genre => {
                 if (musicGenres.indexOf(genre) == -1) {
@@ -129,7 +164,7 @@
             events = events.sort((a, b) => (a.start > b.start) ? 1 : -1)
             var firstEvent = events[0];
 
-            var firstTime = firstEvent.start.toString().substring(11, 13);
+            // var firstTime = firstEvent.start.toString().substring(11, 13);
 
             var calendarEl = document.getElementById('calendar');
 
@@ -157,7 +192,7 @@
                 // },
                 defaultView: 'resourceTimelineDay',
                 // defaultView: 'timelineDay',
-                defaultDate: '2020-06-21',
+                defaultDate: currentYear + '-06-21',
                 displayEventTime: true,
                 eventOrder: 'start',
                 eventTimeFormat: {
@@ -177,11 +212,11 @@
                     }
                 },
                 // minTime: firstTime + ':00:00',
-                slotHeight: 50,
-                slotWidth: 200,
+                slotHeight: 25,
+                slotWidth: 100,
                 timeZone: timeZoneGuess,
                 resources: resources,
-                resourceAreaWidth: '20%',
+                resourceAreaWidth: '35%',
                 resourceColumns: [{
                     labelText: 'Artist',
                     field: 'title'
@@ -250,10 +285,14 @@
 
                     info.el.querySelector('.fc-cell-text').appendChild(artistProfileDiv);
 
-                    if (info.resource.extendedProps.image_url) {
+                    // if (info.resource.extendedProps.image_url) {
                         var artistProfileImageDiv = document.createElement('div');
                         artistProfileImageDiv.id = 'artist-profile-image';
-                        artistProfileImageDiv.style = 'background-image: url(' + info.resource.extendedProps.image_url + ');'
+                        if (info.resource.extendedProps.image_url) {
+                            artistProfileImageDiv.style = 'background-image: url(' + info.resource.extendedProps.image_url + ');'
+                        } else {
+                        artistProfileImageDiv.style = 'background-image: url(' + selectedCity.logo_url + ');'
+                        }
                         // artistProfileImageDiv.style = 'height: 100px'
 
                         // var artistProfileImagePositioner = document.createElement('div');
@@ -268,7 +307,7 @@
                         // artistProfileImagePositioner.appendChild(artistProfileImage);
                         // artistProfileImageDiv.appendChild(artistProfileImagePositioner);
                         artistProfileDiv.appendChild(artistProfileImageDiv);
-                    }
+                    // }
 
                     var artistProfileDetailsDiv = document.createElement('div');
                     artistProfileDetailsDiv.id = 'artist-profile-details';
@@ -484,6 +523,9 @@
                 calendar.setOption('timeZone', this.value);
             });
         });
+        });
+
+        
 
         
     });

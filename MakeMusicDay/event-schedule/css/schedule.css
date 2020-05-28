@@ -12,6 +12,10 @@ body {
     margin: 20px auto;
 }
 
+#loading {
+    display: none;
+}
+
 .fc-event {
     height: 5em;
 }
@@ -55,6 +59,7 @@ body {
     height: 150px;
     background-position: center center;
     background-repeat: no-repeat;
+    background-size: cover;
 }
 
 /*
