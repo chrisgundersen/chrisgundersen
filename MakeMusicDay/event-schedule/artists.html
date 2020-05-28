@@ -40,6 +40,10 @@
             <!-- <option value='UTC'>UTC</option> -->
           </select>
         </div>
+
+        <div style='margin-left: 20px'>
+            <h2 id='cityName'></h2>
+        </div>
       
         <div style='float:right'>
           <span id='loading'>loading...</span>
@@ -56,6 +60,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         var timeZoneSelectorEl = document.getElementById('time-zone-selector');
         var loadingEl = document.getElementById('loading');
+        var cityNameEl = document.getElementById('cityName');
         var params = new URLSearchParams(window.location.search);
         // var b = moment.utc("2013-11-18 11:55").tz("America/Toronto");
         var currentYear = new Date().getFullYear();
@@ -76,6 +81,7 @@
                     logo_url: e.logo_url,
                     latitude: e.latitude,
                     longitude: e.longitude,
+                    name: e.name,
                     primary_button_color: e.primary_button_color,
                     secondary_button_color: e.secondary_button_color,
                     timezone: e.timezone,
@@ -83,13 +89,14 @@
                 });
             });
         }).then(function () {
-            var selectedCityId = "09439b48-377b-469c-9a9c-a05b294d537e"; // Test city, will be overwritten if real param is supplied
+            var selectedCityId = "1f0e5787-bf54-4fcd-b414-63a9b7494692" // "09439b48-377b-469c-9a9c-a05b294d537e"; // Test city, will be overwritten if real param is supplied
 
         if (params.has('cityId')) {
             selectedCityId = params.get('cityId');
         }
 
         var selectedCity = cities.find( ({id}) => id === selectedCityId );
+        cityNameEl.innerHTML = selectedCity.name;
 
         var timeZoneGuess = moment.tz.guess();
 
@@ -102,7 +109,7 @@
         var events = [];
 
         $.ajax({
-            url: "https://ny.makemusic.dev/api/cities/events/simple",
+            url: selectedCity.base_url + "/api/cities/events/simple",
             method: "GET",
             datatype: "json"
         }).done(function (response) {
