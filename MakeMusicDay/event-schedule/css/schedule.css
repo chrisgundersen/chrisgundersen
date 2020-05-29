@@ -62,6 +62,34 @@ body {
     background-size: cover;
 }
 
+.header-grid{
+    display : block;
+    width : 100%;
+    overflow : auto;
+    margin : 20px auto 0 auto;
+    }
+    .cityDiv{
+    /* background-color : rgba(255,255,255, 0.5); */
+    float : left;
+    clear : none;
+    /* height : 350px; */
+    width : 30%;
+    }
+    .genreDiv{
+    /* background-color : rgba(255,255,255, 0.5); */
+    float : left;
+    clear : none;
+    /* height : 350px; */
+    width : 20%;
+    }
+    .timeZoneDiv{
+    /* background-color : rgba(255,255,255, 0.5); */
+    float : left;
+    clear : none;
+    /* height : 350px; */
+    width : 30%;
+    }
+
 /*
 i wish this required CSS was better documented :(
 https://github.com/FezVrasta/popper.js/issues/674
