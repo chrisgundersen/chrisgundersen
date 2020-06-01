@@ -148,11 +148,13 @@
                 // var resources = [];
 
                 $.each(response.events, function (idx, e) {
-                    e.artist.genres.forEach(genre => {
-                        if (musicGenres.indexOf(genre) == -1) {
-                            musicGenres.push(genre);
-                        }
-                    });
+                    if (e.venue.genres) {
+                        e.venue.genres.forEach(genre => {
+                            if (musicGenres.indexOf(genre) == -1) {
+                                musicGenres.push(genre);
+                            }
+                        });
+                    }
                     // resources.push({
                     //     id: e.artist.name,
                     //     title: e.artist.name,
@@ -170,14 +172,13 @@
                         end: e.utc_end_time,
                         // title: e.venue.name,
                         title: e.artist.name + ' @ ' + e.venue.name,
-                        resourceId: e.artist.id,
-                        description: e.venue.description,
+                        resourceId: e.venue.id,
+                        description: e.venue.venue_type,
                         // latitude: e.venue.latitude,
                         // longitude: e.venue.longitude,
-                        artist: e.artist,
+                        venue: e.venue,
                         url: 'https://www.google.com/maps/dir/?api=1&destination=' +
-                            e.venue
-                            .latitude + ',' + e.venue.longitude
+                            e.venue.latitude + ',' + e.venue.longitude
                     });
                 });
 
@@ -206,19 +207,18 @@
                 events.forEach(event => {
                     if (!resources.find(({
                             id
-                        }) => id == event.artist.id)) {
+                        }) => id == event.venue.id)) {
                         resources.push({
-                            id: event.artist.id,
-                            title: event.artist.name,
-                            description: event.artist.description,
-                            image_url: event.artist.image_url,
-                            genres: event.artist.genres,
-                            url: event.artist.url,
-                            facebook_url: event.artist.facebook_url,
-                            instagram_url: event.artist.instagram_url,
-                            soundcloud_url: event.artist.soundcloud_url,
-                            twitter_url: event.artist.twitter_url,
-                            youtube_url: event.artist.youtube_url
+                            id: event.venue.id,
+                            title: event.venue.name,
+                            address: event.venue.address,
+                            venue_type: event.venue.venue_type,
+                            genres: event.venue.genres,
+                            url: event.venue.url,
+                            facebook_url: event.venue.facebook_url,
+                            instagram_url: event.venue.instagram_url,
+                            twitter_url: event.venue.twitter_url,
+                            youtube_url: event.venue.youtube_url
                         });
                     }
                 })
@@ -263,7 +263,7 @@
                     } else {
                         filteredResources = [];
                         resources.forEach(resource => {
-                            if (resource.genres.indexOf(genreSelectorEl.value) >
+                            if (resource.genres && resource.genres.indexOf(genreSelectorEl.value) >
                                 -1) {
                                 filteredResources.push(resource);
                             }
@@ -279,9 +279,9 @@
                         //     successCallback(resources);
                         // })
                     },
-                    resourceAreaWidth: '35%',
+                    resourceAreaWidth: '20%',
                     resourceColumns: [{
-                        labelText: 'Artist',
+                        labelText: 'Venue',
                         field: 'title'
                     }],
                     events: events,
@@ -356,30 +356,30 @@
                             artistProfileDiv);
 
                         // if (info.resource.extendedProps.image_url) {
-                        var artistProfileImageDiv = document.createElement('div');
-                        artistProfileImageDiv.id = 'artist-profile-image';
-                        if (info.resource.extendedProps.image_url) {
-                            artistProfileImageDiv.style = 'background-image: url(' +
-                                info.resource.extendedProps.image_url + ');'
-                        } else {
-                            artistProfileImageDiv.style = 'background-image: url(' +
-                                selectedCity.logo_url + ');'
-                        }
-                        // artistProfileImageDiv.style = 'height: 100px'
-
-                        // var artistProfileImagePositioner = document.createElement('div');
-                        // artistProfileImagePositioner.id = 'artist-profile-image-positioner';
-
-                        // var artistProfileImage = document.createElement('img');
-                        // artistProfileImage.className = 'artist-profile-image-crop-square';
-                        // artistProfileImage.setAttribute('src', info.resource.extendedProps.image_url);
-                        // // artistProfileImage.style = 'max-height: 100%; max-width: 100%';
-                        // artistProfileImage.alt = info.resource.title;
-
-                        // artistProfileImagePositioner.appendChild(artistProfileImage);
-                        // artistProfileImageDiv.appendChild(artistProfileImagePositioner);
-                        artistProfileDiv.appendChild(artistProfileImageDiv);
+                        // var artistProfileImageDiv = document.createElement('div');
+                        // artistProfileImageDiv.id = 'artist-profile-image';
+                        // if (info.resource.extendedProps.image_url) {
+                        //     artistProfileImageDiv.style = 'background-image: url(' +
+                        //         info.resource.extendedProps.image_url + ');'
+                        // } else {
+                        //     artistProfileImageDiv.style = 'background-image: url(' +
+                        //         selectedCity.logo_url + ');'
                         // }
+                        // // artistProfileImageDiv.style = 'height: 100px'
+
+                        // // var artistProfileImagePositioner = document.createElement('div');
+                        // // artistProfileImagePositioner.id = 'artist-profile-image-positioner';
+
+                        // // var artistProfileImage = document.createElement('img');
+                        // // artistProfileImage.className = 'artist-profile-image-crop-square';
+                        // // artistProfileImage.setAttribute('src', info.resource.extendedProps.image_url);
+                        // // // artistProfileImage.style = 'max-height: 100%; max-width: 100%';
+                        // // artistProfileImage.alt = info.resource.title;
+
+                        // // artistProfileImagePositioner.appendChild(artistProfileImage);
+                        // // artistProfileImageDiv.appendChild(artistProfileImagePositioner);
+                        // artistProfileDiv.appendChild(artistProfileImageDiv);
+                        // // }
 
                         var artistProfileDetailsDiv = document.createElement('div');
                         artistProfileDetailsDiv.id = 'artist-profile-details';
@@ -421,17 +421,20 @@
 
                         artistProfileDiv.appendChild(artistProfileDetailsDiv);
 
-                        var genreGroup = document.createElement('div');
-                        genreGroup.className = 'genre-item-group';
+                        if (info.resource.extendedProps.genres) {
 
-                        info.resource.extendedProps.genres.forEach(genre => {
-                            var genreItem = document.createElement('href');
-                            genreItem.className = 'genre-item';
-                            genreItem.innerHTML = genre.replace(/_/gi, '/');
-                            genreGroup.appendChild(genreItem);
-                        })
+                            var genreGroup = document.createElement('div');
+                            genreGroup.className = 'genre-item-group';
 
-                        artistProfileDetailsDiv.appendChild(genreGroup);
+                            info.resource.extendedProps.genres.forEach(genre => {
+                                var genreItem = document.createElement('href');
+                                genreItem.className = 'genre-item';
+                                genreItem.innerHTML = genre.replace(/_/gi, '/');
+                                genreGroup.appendChild(genreItem);
+                            })
+
+                            artistProfileDetailsDiv.appendChild(genreGroup);
+                        }
 
                         // var questionMark = document.createElement('i');
                         // // questionMark.innerText = ' (?) ';
@@ -482,28 +485,10 @@
                         //     container: 'body'
                         // });
 
-                        var maxDescriptionLength = 200;
-
                         var descriptionDiv = document.createElement('div');
                         descriptionDiv.className = 'artist-description';
                         var descriptionText = document.createElement('p');
-                        descriptionText.innerHTML = info.resource.extendedProps.description.substring(0, maxDescriptionLength);
-
-                        if (info.resource.extendedProps.description.length > maxDescriptionLength) {
-                            var readMore = document.createElement('span')
-                            readMore.innerHTML = '...(read more)';
-
-                             var tooltip = new Tooltip(readMore, {
-                                title: info.resource.extendedProps.description,
-                                html: true,
-                                placement: 'top',
-                                trigger: 'hover',
-                                container: 'body'
-                            });
-
-                            descriptionText.appendChild(readMore);
-
-                        }
+                        descriptionText.innerHTML = info.resource.extendedProps.venue_type;
 
                         descriptionDiv.appendChild(descriptionText);
 
@@ -559,25 +544,6 @@
 
                             var link = document.createElement('a');
                             link.setAttribute('href', info.resource.extendedProps.instagram_url);
-                            link.setAttribute('target', '_blank');
-
-                            link.appendChild(icon);
-
-                            var spacer = document.createElement('strong');
-                            spacer.innerText = '  ';
-
-                            linksDiv.appendChild(spacer).appendChild(link);
-                        }
-
-                        if (info.resource.extendedProps.soundcloud_url) {
-                            var icon = document.createElement('i');
-                            icon.className = 'fa fa-soundcloud artist-link';
-                            icon.setAttribute('aria-hidden', true);
-                            icon.setAttribute('alt', 'SoundCloud');
-                            icon.setAttribute('title', 'SoundCloud');
-
-                            var link = document.createElement('a');
-                            link.setAttribute('href', info.resource.extendedProps.soundcloud_url);
                             link.setAttribute('target', '_blank');
 
                             link.appendChild(icon);

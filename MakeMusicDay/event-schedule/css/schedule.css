@@ -109,7 +109,7 @@ body {
 
 .artist-link {
     color: black;
-    text-shadow: 1px 1px 1px #212121;
+    /* text-shadow: 1px 1px 1px #212121; */
     font-size: 1.5em;
 }
 
