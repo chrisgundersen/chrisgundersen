@@ -87,8 +87,8 @@
 
         var cities = [];
         var events = [];
-            var resources = [];
-            var filteredResources = [];
+        var resources = [];
+        var filteredResources = [];
 
         $.ajax({
             url: "https://ny.makemusic.dev/api/cities",
@@ -135,7 +135,7 @@
 
 
 
-            
+
 
             $.ajax({
                 url: selectedCity.base_url + "/api/cities/events/simple",
@@ -209,7 +209,13 @@
                             title: event.artist.name,
                             description: event.artist.description,
                             image_url: event.artist.image_url,
-                            genres: event.artist.genres
+                            genres: event.artist.genres,
+                            url: event.artist.url,
+                            facebook_url: event.artist.facebook_url,
+                            instagram_url: event.artist.instagram_url,
+                            soundcloud_url: event.artist.soundcloud_url,
+                            twitter_url: event.artist.twitter_url,
+                            youtube_url: event.artist.youtube_url
                         });
                     }
                 })
@@ -246,7 +252,29 @@
                     slotHeight: 25,
                     slotWidth: 150,
                     timeZone: timeZoneGuess,
-                    resources: resources,
+                    //resources: resources,
+                    resources: function (fetchInfo, successCallback, failureCallback) {
+                        if (genreSelectorEl.value === '_all') {
+                            successCallback(resources);
+                    } else {
+                        filteredResources = [];
+                        resources.forEach(resource => {
+                            if (resource.genres.indexOf(genreSelectorEl.value) >
+                                -1) {
+                                filteredResources.push(resource);
+                            }
+                        })
+
+                        successCallback(filteredResources);
+                    }
+                        // somethingAsynchonous({
+                        //     start: fetchInfo.start,
+                        //     end: fetchInfo.end,
+                        //     timeZone: fetchInfo.timeZone
+                        // }, function (resources) {
+                        //     successCallback(resources);
+                        // })
+                    },
                     resourceAreaWidth: '35%',
                     resourceColumns: [{
                         labelText: 'Artist',
@@ -357,30 +385,30 @@
 
                         artistProfileDetailsDiv.appendChild(artistName);
 
-                        if (info.resource.extendedProps.description) {
-                            var questionMark = document.createElement('i');
-                            // questionMark.innerText = ' (?) ';
-                            questionMark.className = 'fa fa-info';
+                        // if (info.resource.extendedProps.description) {
+                        //     var questionMark = document.createElement('i');
+                        //     // questionMark.innerText = ' (?) ';
+                        //     questionMark.className = 'fa fa-info';
 
-                            // var info = document.createElement('i');
-                            // info.className = 'fa fa-info';
-                            // info.setAttribute('aria-hidden', true);
+                        //     // var info = document.createElement('i');
+                        //     // info.className = 'fa fa-info';
+                        //     // info.setAttribute('aria-hidden', true);
 
-                            var spacer = document.createElement('strong');
-                            spacer.innerText = '  ';
+                        //     var spacer = document.createElement('strong');
+                        //     spacer.innerText = '  ';
 
-                            artistProfileDetailsDiv.appendChild(spacer)
-                                .appendChild(questionMark);
+                        //     artistProfileDetailsDiv.appendChild(spacer)
+                        //         .appendChild(questionMark);
 
-                            var tooltip = new Tooltip(questionMark, {
-                                title: info.resource.extendedProps
-                                    .description,
-                                html: true,
-                                placement: 'top',
-                                trigger: 'hover',
-                                container: 'body'
-                            });
-                        }
+                        //     var tooltip = new Tooltip(questionMark, {
+                        //         title: info.resource.extendedProps
+                        //             .description,
+                        //         html: true,
+                        //         placement: 'top',
+                        //         trigger: 'hover',
+                        //         container: 'body'
+                        //     });
+                        // }
 
                         // var artistDescription = document.createElement('p');
                         // artistDescription.innerHTML = info.resource.extendedProps.description;
@@ -388,6 +416,18 @@
 
 
                         artistProfileDiv.appendChild(artistProfileDetailsDiv);
+
+                        var genreGroup = document.createElement('div');
+                        genreGroup.className = 'genre-item-group';
+
+                        info.resource.extendedProps.genres.forEach(genre => {
+                            var genreItem = document.createElement('href');
+                            genreItem.className = 'genre-item';
+                            genreItem.innerHTML = genre.replace(/_/gi, '/');
+                            genreGroup.appendChild(genreItem);
+                        })
+
+                        artistProfileDetailsDiv.appendChild(genreGroup);
 
                         // var questionMark = document.createElement('i');
                         // // questionMark.innerText = ' (?) ';
@@ -438,121 +478,139 @@
                         //     container: 'body'
                         // });
 
-                        // if (info.resource.extendedProps.url) {
-                        //     var icon = document.createElement('i');
-                        //     icon.className = 'fa fa-link';
-                        //     icon.setAttribute('aria-hidden', true);
+                        var maxDescriptionLength = 200;
 
-                        //     var link = document.createElement('a');
-                        //     link.setAttribute('href', info.resource.extendedProps.url);
-                        //     link.setAttribute('target', '_blank');
+                        var descriptionDiv = document.createElement('div');
+                        descriptionDiv.className = 'artist-description';
+                        var descriptionText = document.createElement('p');
+                        descriptionText.innerHTML = info.resource.extendedProps.description.substring(0, maxDescriptionLength);
 
-                        //     link.appendChild(icon);
+                        if (info.resource.extendedProps.description.length > maxDescriptionLength) {
+                            var readMore = document.createElement('span')
+                            readMore.innerHTML = '...(read more)';
 
-                        //     var spacer = document.createElement('strong');
-                        //     spacer.innerText = ' | ';
+                             var tooltip = new Tooltip(readMore, {
+                                title: info.resource.extendedProps.description,
+                                html: true,
+                                placement: 'top',
+                                trigger: 'hover',
+                                container: 'body'
+                            });
 
-                        //     info.el.querySelector('.fc-cell-text')
-                        //         .appendChild(spacer)
-                        //         .appendChild(link);
-                        // }
+                            descriptionText.appendChild(readMore);
 
-                        // if (info.resource.extendedProps.facebook_url) {
-                        //     var icon = document.createElement('i');
-                        //     icon.className = 'fa fa-facebook';
-                        //     icon.setAttribute('aria-hidden', true);
+                        }
 
-                        //     var link = document.createElement('a');
-                        //     link.setAttribute('href', info.resource.extendedProps.facebook_url);
-                        //     link.setAttribute('target', '_blank');
+                        descriptionDiv.appendChild(descriptionText);
 
-                        //     link.appendChild(icon);
+                        artistProfileDetailsDiv.appendChild(descriptionDiv);
 
-                        //     var spacer = document.createElement('strong');
-                        //     spacer.innerText = ' | ';
+                        var linksDiv = document.createElement('div');
+                        // linksDiv.className = 'links';
 
-                        //     info.el.querySelector('.fc-cell-text')
-                        //         .appendChild(spacer)
-                        //         .appendChild(link);
-                        // }
+                        if (info.resource.extendedProps.url) {
+                            var icon = document.createElement('i');
+                            icon.className = 'fa fa-link artist-link';
+                            icon.setAttribute('aria-hidden', true);
 
-                        // if (info.resource.extendedProps.instagram_url) {
-                        //     var icon = document.createElement('i');
-                        //     icon.className = 'fa fa-instagram';
-                        //     icon.setAttribute('aria-hidden', true);
+                            var link = document.createElement('a');
+                            link.setAttribute('href', info.resource.extendedProps.url);
+                            link.setAttribute('target', '_blank');
 
-                        //     var link = document.createElement('a');
-                        //     link.setAttribute('href', info.resource.extendedProps
-                        //     .instagram_url);
-                        //     link.setAttribute('target', '_blank');
+                            link.appendChild(icon);
 
-                        //     link.appendChild(icon);
+                            var spacer = document.createElement('strong');
+                            spacer.innerText = '  ';
 
-                        //     var spacer = document.createElement('strong');
-                        //     spacer.innerText = ' | ';
+                            linksDiv.appendChild(spacer).appendChild(link);
+                        }
 
-                        //     info.el.querySelector('.fc-cell-text')
-                        //         .appendChild(spacer)
-                        //         .appendChild(link);
-                        // }
+                        if (info.resource.extendedProps.facebook_url) {
+                            var icon = document.createElement('i');
+                            icon.className = 'fa fa-facebook artist-link';
+                            icon.setAttribute('aria-hidden', true);
 
-                        // if (info.resource.extendedProps.soundcloud_url) {
-                        //     var icon = document.createElement('i');
-                        //     icon.className = 'fa fa-soundcloud';
-                        //     icon.setAttribute('aria-hidden', true);
+                            var link = document.createElement('a');
+                            link.setAttribute('href', info.resource.extendedProps.facebook_url);
+                            link.setAttribute('target', '_blank');
 
-                        //     var link = document.createElement('a');
-                        //     link.setAttribute('href', info.resource.extendedProps
-                        //         .soundcloud_url);
-                        //     link.setAttribute('target', '_blank');
+                            link.appendChild(icon);
 
-                        //     link.appendChild(icon);
+                            var spacer = document.createElement('strong');
+                            spacer.innerText = '  ';
 
-                        //     var spacer = document.createElement('strong');
-                        //     spacer.innerText = ' | ';
+                            linksDiv.appendChild(spacer).appendChild(link);
+                        }
 
-                        //     info.el.querySelector('.fc-cell-text')
-                        //         .appendChild(spacer)
-                        //         .appendChild(link);
-                        // }
+                        if (info.resource.extendedProps.instagram_url) {
+                            var icon = document.createElement('i');
+                            icon.className = 'fa fa-instagram artist-link';
+                            icon.setAttribute('aria-hidden', true);
 
-                        // if (info.resource.extendedProps.twitter_url) {
-                        //     var icon = document.createElement('i');
-                        //     icon.className = 'fa fa-twitter';
-                        //     icon.setAttribute('aria-hidden', true);
+                            var link = document.createElement('a');
+                            link.setAttribute('href', info.resource.extendedProps.instagram_url);
+                            link.setAttribute('target', '_blank');
 
-                        //     var link = document.createElement('a');
-                        //     link.setAttribute('href', info.resource.extendedProps.twitter_url);
-                        //     link.setAttribute('target', '_blank');
+                            link.appendChild(icon);
 
-                        //     link.appendChild(icon);
+                            var spacer = document.createElement('strong');
+                            spacer.innerText = '  ';
 
-                        //     var spacer = document.createElement('strong');
-                        //     spacer.innerText = ' | ';
+                            linksDiv.appendChild(spacer).appendChild(link);
+                        }
 
-                        //     info.el.querySelector('.fc-cell-text')
-                        //         .appendChild(spacer)
-                        //         .appendChild(link);
-                        // }
+                        if (info.resource.extendedProps.soundcloud_url) {
+                            var icon = document.createElement('i');
+                            icon.className = 'fa fa-soundcloud artist-link';
+                            icon.setAttribute('aria-hidden', true);
 
-                        // if (info.resource.extendedProps.youtube_url) {
-                        //     var icon = document.createElement('i');
-                        //     icon.className = 'fa fa-youtube';
-                        //     icon.setAttribute('aria-hidden', true);
+                            var link = document.createElement('a');
+                            link.setAttribute('href', info.resource.extendedProps.soundcloud_url);
+                            link.setAttribute('target', '_blank');
 
-                        //     var link = document.createElement('a');
-                        //     link.setAttribute('href', info.resource.extendedProps.youtube_url);
-                        //     link.setAttribute('target', '_blank');
+                            link.appendChild(icon);
 
-                        //     link.appendChild(icon);
+                            var spacer = document.createElement('strong');
+                            spacer.innerText = '  ';
 
-                        //     var spacer = document.createElement('strong');
-                        //     spacer.innerText = ' | ';
+                            linksDiv.appendChild(spacer).appendChild(link);
+                        }
 
-                        //     info.el.querySelector('.fc-cell-text')
-                        //         .appendChild(spacer)
-                        //         .appendChild(link);
-                        // }
+                        if (info.resource.extendedProps.twitter_url) {
+                            var icon = document.createElement('i');
+                            icon.className = 'fa fa-twitter artist-link';
+                            icon.setAttribute('aria-hidden', true);
+
+                            var link = document.createElement('a');
+                            link.setAttribute('href', info.resource.extendedProps.twitter_url);
+                            link.setAttribute('target', '_blank');
+
+                            link.appendChild(icon);
+
+                            var spacer = document.createElement('strong');
+                            spacer.innerText = '  ';
+
+                            linksDiv.appendChild(spacer).appendChild(link);
+                        }
+
+                        if (info.resource.extendedProps.youtube_url) {
+                            var icon = document.createElement('i');
+                            icon.className = 'fa fa-youtube artist-link';
+                            icon.setAttribute('aria-hidden', true);
+
+                            var link = document.createElement('a');
+                            link.setAttribute('href', info.resource.extendedProps.youtube_url);
+                            link.setAttribute('target', '_blank');
+
+                            link.appendChild(icon);
+
+                            var spacer = document.createElement('strong');
+                            spacer.innerText = '  ';
+
+                            linksDiv.appendChild(spacer).appendChild(link);
+                        }
+
+                        artistProfileDetailsDiv.appendChild(linksDiv);
                     }
                 });
 
@@ -582,27 +640,28 @@
                 }
 
                 genreSelectorEl.addEventListener('change', function () {
-                    if (genreSelectorEl.value === '_all') {
-                        calendar.setOption('resources', resources);
-                    } else {
-                        filteredResources = [];
-                        resources.forEach(resource => {
-                            if (resource.genres.indexOf(genreSelectorEl.value) > -1) {
-                                filteredResources.push(resource);
-                            }
-                        })
-                        
-                        // resources.forEach(resource => {
-                        //     if (resource.genres.includes(({
-                        //             genre
-                        //         }) => genre == genreSelectorEl.value)) {
-                        //             filteredResources.push(resource);
-                        //     }
-                        // })
+                    // if (genreSelectorEl.value === '_all') {
+                    //     calendar.setOption('resources', resources);
+                    // } else {
+                    //     filteredResources = [];
+                    //     resources.forEach(resource => {
+                    //         if (resource.genres.indexOf(genreSelectorEl.value) >
+                    //             -1) {
+                    //             filteredResources.push(resource);
+                    //         }
+                    //     })
 
-                        calendar.setOption('resources', filteredResources);
-                    }
-                    calendar.rerenderResources();
+                    //     // resources.forEach(resource => {
+                    //     //     if (resource.genres.includes(({
+                    //     //             genre
+                    //     //         }) => genre == genreSelectorEl.value)) {
+                    //     //             filteredResources.push(resource);
+                    //     //     }
+                    //     // })
+
+                    //     calendar.setOption('resources', filteredResources);
+                    // }
+                    calendar.refetchResources();
                 })
             });
         });
