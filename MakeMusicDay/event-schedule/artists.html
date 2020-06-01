@@ -2,6 +2,7 @@
 <html>
 
 <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
     <!-- JS Dependencies -->
     <script data-require="jquery@*" data-semver="3.1.1"
         src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
@@ -32,7 +33,7 @@
     <div class="header-grid">
         <div class="cityDiv">
             <h2 id='cityName'></h2>
-            <a href='' id='contact-us' target='_blank'><i class="fa fa-question-circle-o" aria-hidden="true"></i></a>
+            <!-- <a href='' id='contact-us' target='_blank'><i class="fa fa-question-circle-o" aria-hidden="true"></i></a> -->
         </div>
         <div class="genreDiv">
             Genre:
@@ -78,10 +79,11 @@
         var genreSelectorEl = document.getElementById('genre-selector');
         var loadingEl = document.getElementById('loading');
         var cityNameEl = document.getElementById('cityName');
-        var contactUsEl = document.getElementById('contact-us');
+        // var contactUsEl = document.getElementById('contact-us');
         var params = new URLSearchParams(window.location.search);
         // var b = moment.utc("2013-11-18 11:55").tz("America/Toronto");
         var currentYear = new Date().getFullYear();
+        var firstEvent;
 
         var musicGenres = [];
 
@@ -123,7 +125,7 @@
                 id
             }) => id === selectedCityId);
             cityNameEl.innerHTML = selectedCity.name;
-            contactUsEl.setAttribute('href', selectedCity.contact_us_url);
+            // contactUsEl.setAttribute('href', selectedCity.contact_us_url);
 
             var timeZoneGuess = moment.tz.guess();
 
@@ -192,7 +194,8 @@
                 }
 
                 events = events.sort((a, b) => (a.start > b.start) ? 1 : -1)
-                var firstEvent = events[0];
+                firstEvent = moment.utc(events[0].start);
+                firstEvent.tz(timeZoneGuess);
 
                 // var firstTime = firstEvent.start.toString().substring(11, 13);
 
@@ -235,8 +238,8 @@
                     eventTimeFormat: {
                         hour: 'numeric',
                         minute: '2-digit',
-                        meridiem: 'narrow',
-                        timeZoneName: 'short'
+                        meridiem: 'narrow' //,
+                        // timeZoneName: 'short'
                     },
                     eventBackgroundColor: '#f15a22',
                     eventBorderColor: '#000000',
@@ -249,6 +252,7 @@
                         }
                     },
                     // minTime: firstTime + ':00:00',
+                    minTime: firstEvent.local().hours().toString() + ':00:00',
                     slotHeight: 25,
                     slotWidth: 150,
                     timeZone: timeZoneGuess,
@@ -618,7 +622,12 @@
 
                 // when the timezone selector changes, dynamically change the calendar option
                 timeZoneSelectorEl.addEventListener('change', function () {
+                    var newFirstTime = moment.utc(events[0].start).tz(this.value);
+                    
+                    calendar.setOption('minTime', newFirstTime.hours().toString() + ':00:00');
                     calendar.setOption('timeZone', this.value);
+
+                    // calendar.render();
                 });
 
                 function getResourcesFilteredByGenre() {
