@@ -108,7 +108,7 @@ body {
 }
 
 .artist-link {
-    color: #f15a22;
+    color: black;
     text-shadow: 1px 1px 1px #212121;
     font-size: 1.5em;
 }
@@ -155,8 +155,8 @@ derived from this CSS on this page: https://popper.js.org/tooltip-examples.html
 .tooltip {
     position: absolute;
     z-index: 9999;
-    background: #f15a22;
-    color: #FFFFFF;
+    background: #F5F5F5;
+    color: #212121;
     width: 450px;
     border-radius: 3px;
     box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
@@ -165,8 +165,8 @@ derived from this CSS on this page: https://popper.js.org/tooltip-examples.html
 }
 
 .style5 .tooltip {
-    background: #212121;
-    color: #FFFFFF;
+    background: #F5F5F5;
+    color: #212121;
     max-width: 3300px;
     width: auto;
     font-size: .8rem;
@@ -184,7 +184,7 @@ derived from this CSS on this page: https://popper.js.org/tooltip-examples.html
 
 .tooltip .tooltip-arrow,
 .popper .popper__arrow {
-    border-color: #f15a22;
+    border-color: #212121;
 }
 
 .style5 .tooltip .tooltip-arrow {
