@@ -131,6 +131,7 @@
 
             var timeZoneGuessOption = document.createElement('option');
             timeZoneGuessOption.text = 'Your local timezone (best guess: "' + timeZoneGuess + '")';
+            timeZoneGuessOption.value = timeZoneGuess;
             timeZoneGuessOption.selected = true;
             timeZoneSelectorEl.add(timeZoneGuessOption);
 
@@ -174,11 +175,13 @@
                         title: e.artist.name + ' @ ' + e.venue.name,
                         resourceId: e.venue.id,
                         description: e.venue.venue_type,
-                        // latitude: e.venue.latitude,
-                        // longitude: e.venue.longitude,
+                        latitude: e.venue.latitude,
+                        longitude: e.venue.longitude,
                         venue: e.venue,
-                        url: 'https://www.google.com/maps/dir/?api=1&destination=' +
-                            e.venue.latitude + ',' + e.venue.longitude
+                        address: e.venue.address,
+                        livestream_url: e.livestream_url
+                        // url: 'https://www.google.com/maps/dir/?api=1&destination=' +
+                        //     e.venue.latitude + ',' + e.venue.longitude
                     });
                 });
 
@@ -286,14 +289,35 @@
                     }],
                     events: events,
 
-                    eventClick: function (info) {
-                        info.jsEvent
-                            .preventDefault(); // don't let the browser navigate
+                    eventRender: function (info) {
+                        var spacer = document.createElement('strong');
+                        spacer.innerText = ', ';
 
-                        if (info.event.url) {
-                            window.open(info.event.url);
+                        var navigationUrl = document.createElement('a');
+                        navigationUrl.setAttribute('target', '_blank');
+                        navigationUrl.className = 'navigationUrl';
+
+                        if (info.event.extendedProps.livestream_url) {
+                            navigationUrl.innerHTML = 'streaming live';
+                            navigationUrl.setAttribute('href', info.event.extendedProps.livestream_url);
+                        } else {
+                            navigationUrl.innerHTML = info.event.extendedProps.address;
+                            navigationUrl.setAttribute('href', 'https://www.google.com/maps/dir/?api=1&destination=' + info.event.extendedProps.latitude + ',' + info.event.extendedProps.longitude);
                         }
+                        
+
+                        var titleEl = info.el.querySelector('.fc-title');
+                        titleEl.appendChild(spacer).appendChild(navigationUrl);
                     },
+
+                    // eventClick: function (info) {
+                    //     info.jsEvent
+                    //         .preventDefault(); // don't let the browser navigate
+
+                    //     if (info.event.url) {
+                    //         window.open(info.event.url);
+                    //     }
+                    // },
 
                     // eventRender: function(info) {
                     //     var tooltip = new Tooltip(info.el, {
