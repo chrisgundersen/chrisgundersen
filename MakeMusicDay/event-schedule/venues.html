@@ -35,12 +35,12 @@
             <h2 id='cityName'></h2>
             <!-- <a href='' id='contact-us' target='_blank'><i class="fa fa-question-circle-o" aria-hidden="true"></i></a> -->
         </div>
-        <div class="genreDiv">
+        <!-- <div class="genreDiv">
             Genre:
             <select id='genre-selector'>
                 <option selected value='_all'>All genres</option>
             </select>
-        </div>
+        </div> -->
         <div class="timeZoneDiv">
             Timezone:
             <select id='time-zone-selector'>
@@ -76,7 +76,7 @@
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function () {
         var timeZoneSelectorEl = document.getElementById('time-zone-selector');
-        var genreSelectorEl = document.getElementById('genre-selector');
+        // var genreSelectorEl = document.getElementById('genre-selector');
         var loadingEl = document.getElementById('loading');
         var cityNameEl = document.getElementById('cityName');
         // var contactUsEl = document.getElementById('contact-us');
@@ -85,7 +85,7 @@
         var currentYear = new Date().getFullYear();
         var firstEvent;
 
-        var musicGenres = [];
+        // var musicGenres = [];
 
         var cities = [];
         var events = [];
@@ -149,13 +149,13 @@
                 // var resources = [];
 
                 $.each(response.events, function (idx, e) {
-                    if (e.venue.genres) {
-                        e.venue.genres.forEach(genre => {
-                            if (musicGenres.indexOf(genre) == -1) {
-                                musicGenres.push(genre);
-                            }
-                        });
-                    }
+                    // if (e.venue.genres) {
+                    //     e.venue.genres.forEach(genre => {
+                    //         if (musicGenres.indexOf(genre) == -1) {
+                    //             musicGenres.push(genre);
+                    //         }
+                    //     });
+                    // }
                     // resources.push({
                     //     id: e.artist.name,
                     //     title: e.artist.name,
@@ -179,23 +179,21 @@
                         longitude: e.venue.longitude,
                         venue: e.venue,
                         address: e.venue.address,
-                        livestream_url: e.livestream_url
-                        // url: 'https://www.google.com/maps/dir/?api=1&destination=' +
-                        //     e.venue.latitude + ',' + e.venue.longitude
+                        url: e.livestream_url ?? 'https://www.google.com/maps/dir/?api=1&destination=' + e.venue.latitude + ',' + e.venue.longitude
                     });
                 });
 
                 // resources = resources.sort((a, b) => (a.title > b.title) ? 1 : -1)
-                musicGenres = musicGenres.sort();
+                // musicGenres = musicGenres.sort();
 
-                var genreDiv = document.getElementById("genres");
+                // var genreDiv = document.getElementById("genres");
 
-                for (var i = 0; i < musicGenres.length; i++) {
-                    var genreOption = document.createElement('option');
-                    genreOption.text = musicGenres[i].replace(/_/gi, '/');
-                    genreOption.value = musicGenres[i];
-                    genreSelectorEl.add(genreOption);
-                }
+                // for (var i = 0; i < musicGenres.length; i++) {
+                //     var genreOption = document.createElement('option');
+                //     genreOption.text = musicGenres[i].replace(/_/gi, '/');
+                //     genreOption.value = musicGenres[i];
+                //     genreSelectorEl.add(genreOption);
+                // }
 
                 events = events.sort((a, b) => (a.start > b.start) ? 1 : -1)
                 firstEvent = moment.utc(events[0].start);
@@ -216,7 +214,7 @@
                             title: event.venue.name,
                             address: event.venue.address,
                             venue_type: event.venue.venue_type,
-                            genres: event.venue.genres,
+                            // genres: event.venue.genres,
                             url: event.venue.url,
                             facebook_url: event.venue.facebook_url,
                             instagram_url: event.venue.instagram_url,
@@ -259,21 +257,21 @@
                     slotHeight: 25,
                     slotWidth: 150,
                     timeZone: timeZoneGuess,
-                    //resources: resources,
-                    resources: function (fetchInfo, successCallback, failureCallback) {
-                        if (genreSelectorEl.value === '_all') {
-                            successCallback(resources);
-                    } else {
-                        filteredResources = [];
-                        resources.forEach(resource => {
-                            if (resource.genres && resource.genres.indexOf(genreSelectorEl.value) >
-                                -1) {
-                                filteredResources.push(resource);
-                            }
-                        })
+                    resources: resources,
+                    // resources: function (fetchInfo, successCallback, failureCallback) {
+                    //     if (genreSelectorEl.value === '_all') {
+                    //         successCallback(resources);
+                    // } else {
+                    //     filteredResources = [];
+                    //     resources.forEach(resource => {
+                    //         if (resource.genres && resource.genres.indexOf(genreSelectorEl.value) >
+                    //             -1) {
+                    //             filteredResources.push(resource);
+                    //         }
+                    //     })
 
-                        successCallback(filteredResources);
-                    }
+                    //     successCallback(filteredResources);
+                    // }
                         // somethingAsynchonous({
                         //     start: fetchInfo.start,
                         //     end: fetchInfo.end,
@@ -281,7 +279,7 @@
                         // }, function (resources) {
                         //     successCallback(resources);
                         // })
-                    },
+                    // },
                     resourceAreaWidth: '20%',
                     resourceColumns: [{
                         labelText: 'Venue',
@@ -289,35 +287,35 @@
                     }],
                     events: events,
 
+                    eventClick: function (info) {
+                        info.jsEvent
+                            .preventDefault(); // don't let the browser navigate
+
+                        if (info.event.url) {
+                            window.open(info.event.url);
+                        }
+                    },
+
                     eventRender: function (info) {
                         var spacer = document.createElement('strong');
-                        spacer.innerText = ', ';
+                        spacer.innerText = ', ' + (info.event.extendedProps.livestream_url ? 'streaming live' : info.event.extendedProps.address); // = ', ';
 
-                        var navigationUrl = document.createElement('a');
-                        navigationUrl.setAttribute('target', '_blank');
-                        navigationUrl.className = 'navigationUrl';
+                        // var navigationUrl = document.createElement('a');
+                        // navigationUrl.setAttribute('target', '_blank');
+                        // navigationUrl.className = 'navigationUrl';
 
-                        if (info.event.extendedProps.livestream_url) {
-                            navigationUrl.innerHTML = 'streaming live';
-                            navigationUrl.setAttribute('href', info.event.extendedProps.livestream_url);
-                        } else {
-                            navigationUrl.innerHTML = info.event.extendedProps.address;
-                            navigationUrl.setAttribute('href', 'https://www.google.com/maps/dir/?api=1&destination=' + info.event.extendedProps.latitude + ',' + info.event.extendedProps.longitude);
-                        }
+                        // if (info.event.extendedProps.livestream_url) {
+                        //     navigationUrl.innerHTML = 'streaming live';
+                        //     navigationUrl.setAttribute('href', info.event.extendedProps.livestream_url);
+                        // } else {
+                        //     navigationUrl.innerHTML = info.event.extendedProps.address;
+                        //     navigationUrl.setAttribute('href', 'https://www.google.com/maps/dir/?api=1&destination=' + info.event.extendedProps.latitude + ',' + info.event.extendedProps.longitude);
+                        // }
                         
 
                         var titleEl = info.el.querySelector('.fc-title');
-                        titleEl.appendChild(spacer).appendChild(navigationUrl);
+                        titleEl.appendChild(spacer); // .appendChild(navigationUrl);
                     },
-
-                    // eventClick: function (info) {
-                    //     info.jsEvent
-                    //         .preventDefault(); // don't let the browser navigate
-
-                    //     if (info.event.url) {
-                    //         window.open(info.event.url);
-                    //     }
-                    // },
 
                     // eventRender: function(info) {
                     //     var tooltip = new Tooltip(info.el, {
@@ -445,20 +443,20 @@
 
                         artistProfileDiv.appendChild(artistProfileDetailsDiv);
 
-                        if (info.resource.extendedProps.genres) {
+                        // if (info.resource.extendedProps.genres) {
 
-                            var genreGroup = document.createElement('div');
-                            genreGroup.className = 'genre-item-group';
+                        //     var genreGroup = document.createElement('div');
+                        //     genreGroup.className = 'genre-item-group';
 
-                            info.resource.extendedProps.genres.forEach(genre => {
-                                var genreItem = document.createElement('href');
-                                genreItem.className = 'genre-item';
-                                genreItem.innerHTML = genre.replace(/_/gi, '/');
-                                genreGroup.appendChild(genreItem);
-                            })
+                        //     info.resource.extendedProps.genres.forEach(genre => {
+                        //         var genreItem = document.createElement('href');
+                        //         genreItem.className = 'genre-item';
+                        //         genreItem.innerHTML = genre.replace(/_/gi, '/');
+                        //         genreGroup.appendChild(genreItem);
+                        //     })
 
-                            artistProfileDetailsDiv.appendChild(genreGroup);
-                        }
+                        //     artistProfileDetailsDiv.appendChild(genreGroup);
+                        // }
 
                         // var questionMark = document.createElement('i');
                         // // questionMark.innerText = ' (?) ';
@@ -650,30 +648,30 @@
                     }
                 }
 
-                genreSelectorEl.addEventListener('change', function () {
-                    // if (genreSelectorEl.value === '_all') {
-                    //     calendar.setOption('resources', resources);
-                    // } else {
-                    //     filteredResources = [];
-                    //     resources.forEach(resource => {
-                    //         if (resource.genres.indexOf(genreSelectorEl.value) >
-                    //             -1) {
-                    //             filteredResources.push(resource);
-                    //         }
-                    //     })
+                // genreSelectorEl.addEventListener('change', function () {
+                //     // if (genreSelectorEl.value === '_all') {
+                //     //     calendar.setOption('resources', resources);
+                //     // } else {
+                //     //     filteredResources = [];
+                //     //     resources.forEach(resource => {
+                //     //         if (resource.genres.indexOf(genreSelectorEl.value) >
+                //     //             -1) {
+                //     //             filteredResources.push(resource);
+                //     //         }
+                //     //     })
 
-                    //     // resources.forEach(resource => {
-                    //     //     if (resource.genres.includes(({
-                    //     //             genre
-                    //     //         }) => genre == genreSelectorEl.value)) {
-                    //     //             filteredResources.push(resource);
-                    //     //     }
-                    //     // })
+                //     //     // resources.forEach(resource => {
+                //     //     //     if (resource.genres.includes(({
+                //     //     //             genre
+                //     //     //         }) => genre == genreSelectorEl.value)) {
+                //     //     //             filteredResources.push(resource);
+                //     //     //     }
+                //     //     // })
 
-                    //     calendar.setOption('resources', filteredResources);
-                    // }
-                    calendar.refetchResources();
-                })
+                //     //     calendar.setOption('resources', filteredResources);
+                //     // }
+                //     calendar.refetchResources();
+                // })
             });
         });
 
