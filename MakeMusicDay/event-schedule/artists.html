@@ -177,10 +177,8 @@
                         longitude: e.venue.longitude,
                         artist: e.artist,
                         address: e.venue.address,
-                        livestream_url: e.livestream_url
-                        // url: 'https://www.google.com/maps/dir/?api=1&destination=' +
-                        //     e.venue
-                        //     .latitude + ',' + e.venue.longitude
+                        livestream_url: e.livestream_url,
+                        url: e.livestream_url ?? 'https://www.google.com/maps/dir/?api=1&destination=' + e.venue.latitude + ',' + e.venue.longitude
                     });
                 });
 
@@ -289,34 +287,34 @@
                     }],
                     events: events,
 
-                    // eventClick: function (info) {
-                    //     info.jsEvent
-                    //         .preventDefault(); // don't let the browser navigate
+                    eventClick: function (info) {
+                        info.jsEvent
+                            .preventDefault(); // don't let the browser navigate
 
-                    //     // if (info.event.url) {
-                    //     //     window.open(info.event.url);
-                    //     // }
-                    // },
+                        if (info.event.url) {
+                            window.open(info.event.url);
+                        }
+                    },
 
                     eventRender: function (info) {
                         var spacer = document.createElement('strong');
-                        spacer.innerText = ', ';
+                        spacer.innerText = ', ' + (info.event.extendedProps.livestream_url ? 'streaming live' : info.event.extendedProps.address); // = ', ';
 
-                        var navigationUrl = document.createElement('a');
-                        navigationUrl.setAttribute('target', '_blank');
-                        navigationUrl.className = 'navigationUrl';
+                        // var navigationUrl = document.createElement('a');
+                        // navigationUrl.setAttribute('target', '_blank');
+                        // navigationUrl.className = 'navigationUrl';
 
-                        if (info.event.extendedProps.livestream_url) {
-                            navigationUrl.innerHTML = 'streaming live';
-                            navigationUrl.setAttribute('href', info.event.extendedProps.livestream_url);
-                        } else {
-                            navigationUrl.innerHTML = info.event.extendedProps.address;
-                            navigationUrl.setAttribute('href', 'https://www.google.com/maps/dir/?api=1&destination=' + info.event.extendedProps.latitude + ',' + info.event.extendedProps.longitude);
-                        }
+                        // if (info.event.extendedProps.livestream_url) {
+                        //     navigationUrl.innerHTML = 'streaming live';
+                        //     navigationUrl.setAttribute('href', info.event.extendedProps.livestream_url);
+                        // } else {
+                        //     navigationUrl.innerHTML = info.event.extendedProps.address;
+                        //     navigationUrl.setAttribute('href', 'https://www.google.com/maps/dir/?api=1&destination=' + info.event.extendedProps.latitude + ',' + info.event.extendedProps.longitude);
+                        // }
                         
 
                         var titleEl = info.el.querySelector('.fc-title');
-                        titleEl.appendChild(spacer).appendChild(navigationUrl);
+                        titleEl.appendChild(spacer); // .appendChild(navigationUrl);
                     },
 
                     // eventRender: function(info) {
