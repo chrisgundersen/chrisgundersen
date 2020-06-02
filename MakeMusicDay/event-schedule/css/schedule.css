@@ -17,7 +17,11 @@ body {
 }
 
 .fc-event {
-    height: 5em;
+    height: 130px;
+}
+
+.navigationUrl {
+    color: #FFFFFF;
 }
 
 .fc-timeline .fc-body .fc-scroller {
