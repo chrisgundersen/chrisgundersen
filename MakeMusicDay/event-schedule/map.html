@@ -11,135 +11,202 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/us-map/1.0.1/jquery.usmap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
     <link rel="stylesheet" href="css/map.css" />
 
     <script>
         $(document).ready(function () {
-                    var cities = [];
-                    var maxBatchSize = 100;
+
+            var citiesEl = document.getElementById('cities');
+
+            var cities = [];
+            var maxBatchSize = 100;
+
+            $.ajax({
+                url: "https://ny.makemusic.dev/api/cities",
+                method: "GET",
+                datatype: "json"
+            }).done(function (response) {
+                $.each(response, function (idx, e) {
+                    cities.push({
+                        accent_color: e.accent_color,
+                        base_url: e.base_url,
+                        contact_us_url: e.contact_us_url,
+                        id: e.id,
+                        logo_url: e.logo_url,
+                        latitude: e.latitude,
+                        longitude: e.longitude,
+                        name: e.name,
+                        primary_button_color: e.primary_button_color,
+                        secondary_button_color: e.secondary_button_color,
+                        timezone: e.timezone,
+                        url: e.url,
+                        city: null,
+                        state: null
+                    });
+                });
+            }).then(function () {
+
+                var loops = Math.ceil(cities.length / maxBatchSize);
+
+                var i;
+                for (i = 0; i < loops; i++) {
+                    var j;
+                    var reverseGeocodeUrl =
+                        "https://www.mapquestapi.com/geocoding/v1/batch?key=phSy8BoSRFsDmGbPmmKjzScZzQUunimV&thumbMaps=false";
+
+                    for (j = 0; j < maxBatchSize; j++) {
+                        if (cities[(i * maxBatchSize) + j]) {
+                            reverseGeocodeUrl += '&location=' + cities[(i * maxBatchSize) + j]
+                                .latitude + ',' + cities[(i * maxBatchSize) + j].longitude;
+                        }
+                    }
 
                     $.ajax({
-                        url: "https://ny.makemusic.dev/api/cities",
+                        url: reverseGeocodeUrl,
                         method: "GET",
                         datatype: "json"
                     }).done(function (response) {
-                        $.each(response, function (idx, e) {
-                            cities.push({
-                                accent_color: e.accent_color,
-                                base_url: e.base_url,
-                                contact_us_url: e.contact_us_url,
-                                id: e.id,
-                                logo_url: e.logo_url,
-                                latitude: e.latitude,
-                                longitude: e.longitude,
-                                name: e.name,
-                                primary_button_color: e.primary_button_color,
-                                secondary_button_color: e.secondary_button_color,
-                                timezone: e.timezone,
-                                url: e.url,
-                                city: null,
-                                state: null
-                            });
+                        $.each(response.results, function (idx, e) {
+                            var foundCityIndex = cities.findIndex(city => city
+                                .latitude === e.providedLocation.latLng.lat && city
+                                .longitude === e.providedLocation.latLng.lng);
+                            cities[foundCityIndex].city = e.locations[0].adminArea5;
+                            cities[foundCityIndex].state = e.locations[0].adminArea3;
                         });
-                    }).then(function () {
 
-                        var loops = Math.ceil(cities.length / maxBatchSize);
-
-                        var i;
-                        for (i = 0; i < loops; i++) {
-                            var j;
-                            var reverseGeocodeUrl = "https://www.mapquestapi.com/geocoding/v1/batch?key=phSy8BoSRFsDmGbPmmKjzScZzQUunimV&thumbMaps=false";
-
-                            for (j = 0; j < maxBatchSize; j++) {
-                                if (cities[(i*maxBatchSize) + j]) {
-                                    reverseGeocodeUrl += '&location=' + cities[(i*maxBatchSize) + j].latitude + ',' + cities[(i*maxBatchSize) + j].longitude;
-                                }
-                            }
-
-                            $.ajax({
-                                url: reverseGeocodeUrl,
-                                method: "GET",
-                                datatype: "json"
-                            }).done(function (response) {
-                                $.each(response.results, function (idx, e) {
-                                    var foundCityIndex = cities.findIndex(city => city.latitude === e.providedLocation.latLng.lat && city.longitude === e.providedLocation.latLng.lng);
-                                    cities[foundCityIndex].city = e.locations[0].adminArea5;
-                                    cities[foundCityIndex].state = e.locations[0].adminArea3;
-                                });
-                            });
-                        }
-                        // $.ajax({
-                        //     url: "https://ny.makemusic.dev/api/cities",
-                        //     method: "GET",
-                        //     datatype: "json"
-                        // }).done(function (response) {
-                        //     $.each(response, function (idx, e) {
-                        //         cities.push({
-                        //             accent_color: e.accent_color,
-                        //             base_url: e.base_url,
-                        //             contact_us_url: e.contact_us_url,
-                        //             id: e.id,
-                        //             logo_url: e.logo_url,
-                        //             latitude: e.latitude,
-                        //             longitude: e.longitude,
-                        //             name: e.name,
-                        //             primary_button_color: e.primary_button_color,
-                        //             secondary_button_color: e.secondary_button_color,
-                        //             timezone: e.timezone,
-                        //             url: e.url
-                        //         });
-                        //     });
-                        // });
-
-                        $('#map').usmap({
-                            'stateStyles': {
-                                fill: '#F5F5F5'
-                            },
-                            'stateHoverStyles': {
-                                fill: '#f15a22'
-                            },
-                            'stateHoverAnimation': 100,
-                            'showLabels': true,
-                            // 'stateSpecificStyles': {
-                            //   'AK' : {fill: '#f00'}
-                            // },
-                            // 'stateSpecificHoverStyles': {
-                            //   'HI' : {fill: '#ff0'}
-                            // },
-
-                            'mouseoverState': {
-                                'HI': function (event, data) {
-                                    //return false;
-                                }
-                            },
-
-
-                            'click': function (event, data) {
-                                var foundCities = cities.filter(x => x.state === data.name);
-
-                                var cityList = '';
-
-                                foundCities.forEach(city => {
-                                    cityList += city.city + ', ' + city.state;
-                                });
-                                $('#cities')
-                                    .text('Found ' + cityList + ' in ' + data.name)
-                                    .stop()
-                                    .css('backgroundColor', '#ff0')
-                                    .animate({
-                                        backgroundColor: '#ddd'
-                                    }, 1000);
-                            }
-                        });
+                        // var eventCounts = cities.reduce((p, c) => {
+                        //     var stateCode = c.state;
+                        //     if (c.state) {
+                        //         if (!p.hasOwnProperty(stateCode)) {
+                        //             p[stateCode] = 0;
+                        //         }
+                        //         p[stateCode]++;
+                        //     }
+                        //     return p;
+                        // }, {});
                     });
+                }
+                // $.ajax({
+                //     url: "https://ny.makemusic.dev/api/cities",
+                //     method: "GET",
+                //     datatype: "json"
+                // }).done(function (response) {
+                //     $.each(response, function (idx, e) {
+                //         cities.push({
+                //             accent_color: e.accent_color,
+                //             base_url: e.base_url,
+                //             contact_us_url: e.contact_us_url,
+                //             id: e.id,
+                //             logo_url: e.logo_url,
+                //             latitude: e.latitude,
+                //             longitude: e.longitude,
+                //             name: e.name,
+                //             primary_button_color: e.primary_button_color,
+                //             secondary_button_color: e.secondary_button_color,
+                //             timezone: e.timezone,
+                //             url: e.url
+                //         });
+                //     });
+                // });
+
+                // var eventCounts = cities.reduce((p, c) => {
+                //     var stateCode = c.state;
+                //     if (!p.hasOwnProperty(stateCode)) {
+                //         p[stateCode] = 0;
+                //     }
+                //     p[stateCode]++;
+                //     return p;
+                // }, {});
+
+                $('#map').usmap({
+                    'stateStyles': {
+                        fill: '#F5F5F5'
+                    },
+                    'stateHoverStyles': {
+                        fill: '#f15a22'
+                    },
+                    'stateHoverAnimation': 100,
+                    'showLabels': true,
+                    // 'stateSpecificStyles': {
+                    //   'AK' : {fill: '#f00'}
+                    // },
+                    // 'stateSpecificHoverStyles': {
+                    //   'HI' : {fill: '#ff0'}
+                    // },
+
+                    'mouseoverState': {
+                        'HI': function (event, data) {
+                            //return false;
+                        }
+                    },
+
+
+                    'click': function (event, data) {
+                        $('.city').remove();
+
+                        var foundCities = cities.filter(x => x.state === data.name);
+
+                        if (foundCities.length === 0) {
+                            var cityDiv = document.createElement('div');
+                            cityDiv.className = 'city';
+                            var cityState = document.createElement('strong');
+                            cityState.innerHTML = 'No events found in ' + data.name;
+
+                            cityDiv.appendChild(cityState);
+
+                            citiesEl.appendChild(cityDiv);
+                        } else {
+
+                            // var cityList = '';
+
+                            foundCities.forEach(city => {
+                                var cityDiv = document.createElement('div');
+                                cityDiv.className = 'city';
+                                var cityState = document.createElement('strong');
+                                cityState.innerHTML = city.city + ', ' + city.state;
+
+                                var spacer = document.createElement('strong');
+                                spacer.innerText = '  ';
+
+                                var icon = document.createElement('i');
+                                icon.className = 'fa fa-link city-link';
+                                icon.setAttribute('aria-hidden', true);
+                                icon.setAttribute('alt', city.city + ', ' + city
+                                    .state + ' Homepage');
+                                icon.setAttribute('title', city.city + ', ' + city
+                                    .state + ' Homepage');
+
+                                var link = document.createElement('a');
+                                link.setAttribute('href', city.url);
+                                link.setAttribute('target', '_blank');
+
+                                link.appendChild(icon);
+
+                                cityDiv.appendChild(cityState).appendChild(spacer).appendChild(link)
+
+                                citiesEl.appendChild(cityDiv);
+                                // cityList += city.city + ', ' + city.state;
+                            })
+                        };
+                        // $('#cities')
+                        //     .text('Found ' + cityList + ' in ' + data.name)
+                        //     .stop()
+                        //     .css('backgroundColor', '#ff0')
+                        //     .animate({
+                        //         backgroundColor: '#ddd'
+                        //     }, 1000);
+                    }
                 });
+            });
+        });
     </script>
 </head>
 
 <body>
-    <div id="cities">Click alerts</div>
-
     <div id="map" class="map"></div>
+
+    <div id="cities" class="cities"></div>
 </body>
 
 <!-- <script type="text/javascript">
