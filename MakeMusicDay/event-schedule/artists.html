@@ -34,11 +34,11 @@
         <div class="cityDiv">
             <h2 id='cityName'></h2>
             <!-- <a href='' id='contact-us' target='_blank'><i class="fa fa-question-circle-o" aria-hidden="true"></i></a> -->
-            <div class="sortDiv">
+            <div id="sortDiv">
                 <button id='toggleSort' value="">Click to sort by artist name</button>
             </div>
         </div>
-        <div class="genreDiv">
+        <div id="genreDiv">
             Select a Genre:
             <select id='genre-selector'>
                 <option selected value='_all'>All genres</option>
@@ -80,8 +80,10 @@
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function () {
         var timeZoneSelectorEl = document.getElementById('time-zone-selector');
+        var toggleSortDiv = document.getElementById('sortDiv');
         var sortToggleButton = document.getElementById('toggleSort');
         var genreSelectorEl = document.getElementById('genre-selector');
+        var genreSelectorDiv = document.getElementById('genreDiv');
         var loadingEl = document.getElementById('loading');
         var cityNameEl = document.getElementById('cityName');
         // var contactUsEl = document.getElementById('contact-us');
@@ -96,6 +98,11 @@
         var events = [];
         var resources = [];
         var filteredResources = [];
+
+        if (params.has('artistId')) {
+            toggleSortDiv.hidden = true;
+            genreSelectorDiv.hidden = true;
+        }
 
         $.ajax({
             url: "https://ny.makemusic.dev/api/cities",
@@ -154,49 +161,72 @@
                 // var resources = [];
 
                 $.each(response.events, function (idx, e) {
-                    e.artist.genres.forEach(genre => {
-                        if (musicGenres.indexOf(genre) == -1) {
-                            musicGenres.push(genre);
+                    if (!params.has('artistId')) {
+                        e.artist.genres.forEach(genre => {
+                            if (musicGenres.indexOf(genre) == -1) {
+                                musicGenres.push(genre);
+                            }
+                        });
+                        // resources.push({
+                        //     id: e.artist.name,
+                        //     title: e.artist.name,
+                        //     description: e.artist.description,
+                        //     facebook_url: e.artist.facebook_url,
+                        //     image_url: e.artist.image_url,
+                        //     instagram_url: e.artist.instagram_url,
+                        //     soundcloud_url: e.artist.soundcloud_url,
+                        //     twitter_url: e.artist.twitter_url,
+                        //     url: e.artist.url,
+                        //     youtube_url: e.artist.youtube_url
+                        // });
+                        events.push({
+                            start: e.utc_start_time,
+                            end: e.utc_end_time,
+                            // title: e.venue.name,
+                            title: e.artist.name + ' @ ' + e.venue.name,
+                            resourceId: e.artist.id,
+                            description: e.venue.description,
+                            latitude: e.venue.latitude,
+                            longitude: e.venue.longitude,
+                            artist: e.artist,
+                            address: e.venue.address,
+                            livestream_url: e.livestream_url,
+                            url: e.livestream_url ?? 'https://www.google.com/maps/dir/?api=1&destination=' + e.venue.latitude + ',' + e.venue.longitude
+                        });
+                    } else {
+                        if (params.get('artistId') === e.artist.id) {
+                            events.push({
+                                start: e.utc_start_time,
+                                end: e.utc_end_time,
+                                // title: e.venue.name,
+                                title: e.artist.name + ' @ ' + e.venue.name,
+                                resourceId: e.artist.id,
+                                description: e.venue.description,
+                                latitude: e.venue.latitude,
+                                longitude: e.venue.longitude,
+                                artist: e.artist,
+                                address: e.venue.address,
+                                livestream_url: e.livestream_url,
+                                url: e.livestream_url ?? 'https://www.google.com/maps/dir/?api=1&destination=' + e.venue.latitude + ',' + e.venue.longitude
+                            });
                         }
-                    });
-                    // resources.push({
-                    //     id: e.artist.name,
-                    //     title: e.artist.name,
-                    //     description: e.artist.description,
-                    //     facebook_url: e.artist.facebook_url,
-                    //     image_url: e.artist.image_url,
-                    //     instagram_url: e.artist.instagram_url,
-                    //     soundcloud_url: e.artist.soundcloud_url,
-                    //     twitter_url: e.artist.twitter_url,
-                    //     url: e.artist.url,
-                    //     youtube_url: e.artist.youtube_url
-                    // });
-                    events.push({
-                        start: e.utc_start_time,
-                        end: e.utc_end_time,
-                        // title: e.venue.name,
-                        title: e.artist.name + ' @ ' + e.venue.name,
-                        resourceId: e.artist.id,
-                        description: e.venue.description,
-                        latitude: e.venue.latitude,
-                        longitude: e.venue.longitude,
-                        artist: e.artist,
-                        address: e.venue.address,
-                        livestream_url: e.livestream_url,
-                        url: e.livestream_url ?? 'https://www.google.com/maps/dir/?api=1&destination=' + e.venue.latitude + ',' + e.venue.longitude
-                    });
+                    }
                 });
 
-                // resources = resources.sort((a, b) => (a.title > b.title) ? 1 : -1)
-                musicGenres = musicGenres.sort();
+                if (!params.has('artistId')) {
 
-                var genreDiv = document.getElementById("genres");
+                    // resources = resources.sort((a, b) => (a.title > b.title) ? 1 : -1)
+                    musicGenres = musicGenres.sort();
 
-                for (var i = 0; i < musicGenres.length; i++) {
-                    var genreOption = document.createElement('option');
-                    genreOption.text = musicGenres[i].replace(/_/gi, '/');
-                    genreOption.value = musicGenres[i];
-                    genreSelectorEl.add(genreOption);
+                    var genreDiv = document.getElementById("genres");
+
+                    for (var i = 0; i < musicGenres.length; i++) {
+                        var genreOption = document.createElement('option');
+                        genreOption.text = musicGenres[i].replace(/_/gi, '/');
+                        genreOption.value = musicGenres[i];
+                        genreSelectorEl.add(genreOption);
+                    }
+
                 }
 
                 events = events.sort((a, b) => (a.start > b.start) ? 1 : -1)
@@ -213,19 +243,38 @@
                     if (!resources.find(({
                             id
                         }) => id == event.artist.id)) {
-                        resources.push({
-                            id: event.artist.id,
-                            title: event.artist.name,
-                            description: event.artist.description,
-                            image_url: event.artist.image_url,
-                            genres: event.artist.genres,
-                            url: event.artist.url,
-                            facebook_url: event.artist.facebook_url,
-                            instagram_url: event.artist.instagram_url,
-                            soundcloud_url: event.artist.soundcloud_url,
-                            twitter_url: event.artist.twitter_url,
-                            youtube_url: event.artist.youtube_url
-                        });
+                            if (!params.has('artistId')) {
+                                resources.push({
+                                    id: event.artist.id,
+                                    title: event.artist.name,
+                                    description: event.artist.description,
+                                    image_url: event.artist.image_url,
+                                    genres: event.artist.genres,
+                                    url: event.artist.url,
+                                    facebook_url: event.artist.facebook_url,
+                                    instagram_url: event.artist.instagram_url,
+                                    soundcloud_url: event.artist.soundcloud_url,
+                                    twitter_url: event.artist.twitter_url,
+                                    youtube_url: event.artist.youtube_url
+                                });
+                            } else {
+                                if (event.artist.id === params.get('artistId')) {
+                                    resources.push({
+                                    id: event.artist.id,
+                                    title: event.artist.name,
+                                    description: event.artist.description,
+                                    image_url: event.artist.image_url,
+                                    genres: event.artist.genres,
+                                    url: event.artist.url,
+                                    facebook_url: event.artist.facebook_url,
+                                    instagram_url: event.artist.instagram_url,
+                                    soundcloud_url: event.artist.soundcloud_url,
+                                    twitter_url: event.artist.twitter_url,
+                                    youtube_url: event.artist.youtube_url
+                                });
+                                }
+                            }
+                        
                     }
                 })
 
