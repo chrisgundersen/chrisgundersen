@@ -23,6 +23,7 @@
             var maxBatchSize = 100;
 
             $.ajax({
+                async: false,
                 url: "https://ny.makemusic.dev/api/cities",
                 method: "GET",
                 datatype: "json"
@@ -63,6 +64,7 @@
                     }
 
                     $.ajax({
+                        async: false,
                         url: reverseGeocodeUrl,
                         method: "GET",
                         datatype: "json"
