@@ -34,15 +34,19 @@
         <div class="cityDiv">
             <h2 id='cityName'></h2>
             <!-- <a href='' id='contact-us' target='_blank'><i class="fa fa-question-circle-o" aria-hidden="true"></i></a> -->
+            <div class="sortDiv">
+                <button id='toggleSort' value="">Click to sort by artist name</button>
+            </div>
         </div>
         <div class="genreDiv">
-            Genre:
+            Select a Genre:
             <select id='genre-selector'>
                 <option selected value='_all'>All genres</option>
             </select>
         </div>
+        
         <div class="timeZoneDiv">
-            Timezone:
+            Preferred Timezone:
             <select id='time-zone-selector'>
                 <option value='America/New_York'>Eastern Time (America/New York)</option>
                 <option value='America/Chicago'>Central Time (America/Chicago)</option>
@@ -76,6 +80,7 @@
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function () {
         var timeZoneSelectorEl = document.getElementById('time-zone-selector');
+        var sortToggleButton = document.getElementById('toggleSort');
         var genreSelectorEl = document.getElementById('genre-selector');
         var loadingEl = document.getElementById('loading');
         var cityNameEl = document.getElementById('cityName');
@@ -663,6 +668,18 @@
 
                     // calendar.render();
                 });
+
+                sortToggleButton.addEventListener('click', function () {
+                    if (this.value === '') {
+                        this.value = 'artist';
+                        this.innerHTML = 'Click to sort by event start time';
+                        calendar.setOption('resourceOrder', 'title');
+                    } else {
+                        this.value = '';
+                        this.innerHTML = 'Click to sort by artist name';
+                        calendar.setOption('resourceOrder', '');
+                    }
+                })
 
                 function getResourcesFilteredByGenre() {
                     if (genreSelectorEl.value === '_all') {
