@@ -13,7 +13,11 @@ body {
 
 #calendar {
     max-width: 100%;
-    margin: 20px auto;
+    /* margin: 20px auto; */
+}
+
+.eventLocationInfo {
+    text-decoration: underline;
 }
 
 #loading {
@@ -29,7 +33,7 @@ body {
 }
 
 .fc-timeline .fc-body .fc-scroller {
-    height: 600px  !important;
+    /* height: 600px  !important; */
 }
 
 .fc-timeline-event .fc-time,
@@ -45,11 +49,14 @@ body {
     overflow: hidden;
 }
 
-.fc-timeline td, .fc-timeline th {
+.fc-timeline td,
+.fc-timeline th {
     white-space: normal;
 }
 
-.fc-right .fc-prev-button, .fc-right .fc-next-button, .fc-today-button {
+.fc-right .fc-prev-button,
+.fc-right .fc-next-button,
+.fc-today-button {
     background-color: #f15a22;
     background-image: none;
 }
@@ -73,7 +80,7 @@ body {
 }
 
 .genre-item-group {
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     line-height: 1.42857143;
     color: #333;
     font-family: 'Roboto Condensed', sans-serif;
@@ -87,7 +94,7 @@ body {
 }
 
 .genre-item {
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     font-family: 'Roboto Condensed', sans-serif;
     box-sizing: border-box;
     display: inline-block;
@@ -118,40 +125,49 @@ body {
 .artist-link {
     color: black;
     /* text-shadow: 1px 1px 1px #212121; */
-    font-size: 1.5em;
+    font-size: 1em;
 }
 
 .artist-description {
-    font-size: 0.8em;
+    font-size: 0.7em;
 }
 
-.header-grid{
-    display : block;
-    width : 100%;
-    overflow : auto;
-    margin : 20px auto 0 auto;
-    }
-    .cityDiv{
+.header-grid {
+    display: inline-flex;
+    width: 100%;
+    /* overflow : auto; */
+    margin: 5px 0 5px 0;
+}
+
+.sortDiv {
     /* background-color : rgba(255,255,255, 0.5); */
-    float : left;
-    clear : none;
+    float: left;
+    clear: none;
     /* height : 350px; */
-    width : 30%;
-    }
-    #genreDiv{
+    width: 30%;
+    padding: 0 10px 0 10px;
+    margin: auto;
+}
+
+#genreDiv {
     /* background-color : rgba(255,255,255, 0.5); */
-    float : left;
-    clear : none;
+    float: left;
+    clear: none;
     /* height : 350px; */
-    width : 20%;
-    }
-    .timeZoneDiv{
+    width: 20%;
+    padding: 0 10px 0 10px;
+    margin: auto;
+}
+
+.timeZoneDiv {
     /* background-color : rgba(255,255,255, 0.5); */
-    float : left;
-    clear : none;
+    float: left;
+    clear: none;
     /* height : 350px; */
-    width : 30%;
-    }
+    width: 30%;
+    padding: 0 10px 0 10px;
+    margin: auto;
+}
 
 /*
 i wish this required CSS was better documented :(
@@ -170,6 +186,7 @@ derived from this CSS on this page: https://popper.js.org/tooltip-examples.html
     box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
     padding: 10px;
     text-align: center;
+    font-size: 0.7em;
 }
 
 .style5 .tooltip {
@@ -177,7 +194,7 @@ derived from this CSS on this page: https://popper.js.org/tooltip-examples.html
     color: #212121;
     max-width: 3300px;
     width: auto;
-    font-size: .8rem;
+    font-size: 0.7em;
     padding: .5em 1em;
 }
 

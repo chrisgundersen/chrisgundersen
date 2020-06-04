@@ -31,22 +31,18 @@
     <!-- <div id="genres"></div>
     <div id='calendar'></div> -->
     <div class="header-grid">
-        <div class="cityDiv">
-            <h2 id='cityName'></h2>
-            <!-- <a href='' id='contact-us' target='_blank'><i class="fa fa-question-circle-o" aria-hidden="true"></i></a> -->
-            <div id="sortDiv">
-                <button id='toggleSort' value="">Click to sort by artist name</button>
-            </div>
+        <div id="sortDiv">
+            <button id='toggleSort' value="">Sort by artist</button>
         </div>
         <div id="genreDiv">
-            Select a Genre:
+            Genre:
             <select id='genre-selector'>
                 <option selected value='_all'>All genres</option>
             </select>
         </div>
-        
+
         <div class="timeZoneDiv">
-            Preferred Timezone:
+            Time Zone:
             <select id='time-zone-selector'>
                 <option value='America/New_York'>Eastern Time (America/New York)</option>
                 <option value='America/Chicago'>Central Time (America/Chicago)</option>
@@ -56,7 +52,7 @@
             </select>
         </div>
     </div>
-    <div id='top'>
+    <!-- <div id='top'>
 
         <div style='float:left'>
 
@@ -72,7 +68,7 @@
         </div>
 
         <div style='clear:both'></div>
-    </div>
+    </div> -->
 
     <div id='calendar'></div>
 </body>
@@ -85,7 +81,7 @@
         var genreSelectorEl = document.getElementById('genre-selector');
         var genreSelectorDiv = document.getElementById('genreDiv');
         var loadingEl = document.getElementById('loading');
-        var cityNameEl = document.getElementById('cityName');
+        // var cityNameEl = document.getElementById('cityName');
         // var contactUsEl = document.getElementById('contact-us');
         var params = new URLSearchParams(window.location.search);
         // var b = moment.utc("2013-11-18 11:55").tz("America/Toronto");
@@ -105,7 +101,7 @@
         }
 
         $.ajax({
-            url: "https://ny.makemusic.dev/api/cities",
+            url: "https://ny.makemusicday.org/api/cities",
             method: "GET",
             datatype: "json"
         }).done(function (response) {
@@ -127,7 +123,8 @@
             });
         }).then(function () {
             var selectedCityId =
-                "1f0e5787-bf54-4fcd-b414-63a9b7494692" // "09439b48-377b-469c-9a9c-a05b294d537e"; // Test city, will be overwritten if real param is supplied
+                "18aba1da-fd86-4884-91aa-a9c71636db0d"; // New York City in prod
+            // "1f0e5787-bf54-4fcd-b414-63a9b7494692" // "09439b48-377b-469c-9a9c-a05b294d537e"; // Test city, will be overwritten if real param is supplied
 
             if (params.has('cityId')) {
                 selectedCityId = params.get('cityId');
@@ -136,7 +133,7 @@
             var selectedCity = cities.find(({
                 id
             }) => id === selectedCityId);
-            cityNameEl.innerHTML = selectedCity.name;
+            // cityNameEl.innerHTML = selectedCity.name;
             // contactUsEl.setAttribute('href', selectedCity.contact_us_url);
 
             var timeZoneGuess = moment.tz.guess();
@@ -191,7 +188,9 @@
                             artist: e.artist,
                             address: e.venue.address,
                             livestream_url: e.livestream_url,
-                            url: e.livestream_url ?? 'https://www.google.com/maps/dir/?api=1&destination=' + e.venue.latitude + ',' + e.venue.longitude
+                            url: e.livestream_url ??
+                                'https://www.google.com/maps/dir/?api=1&destination=' +
+                                e.venue.latitude + ',' + e.venue.longitude
                         });
                     } else {
                         if (params.get('artistId') === e.artist.id) {
@@ -207,7 +206,9 @@
                                 artist: e.artist,
                                 address: e.venue.address,
                                 livestream_url: e.livestream_url,
-                                url: e.livestream_url ?? 'https://www.google.com/maps/dir/?api=1&destination=' + e.venue.latitude + ',' + e.venue.longitude
+                                url: e.livestream_url ??
+                                    'https://www.google.com/maps/dir/?api=1&destination=' +
+                                    e.venue.latitude + ',' + e.venue.longitude
                             });
                         }
                     }
@@ -243,7 +244,22 @@
                     if (!resources.find(({
                             id
                         }) => id == event.artist.id)) {
-                            if (!params.has('artistId')) {
+                        if (!params.has('artistId')) {
+                            resources.push({
+                                id: event.artist.id,
+                                title: event.artist.name,
+                                description: event.artist.description,
+                                image_url: event.artist.image_url,
+                                genres: event.artist.genres,
+                                url: event.artist.url,
+                                facebook_url: event.artist.facebook_url,
+                                instagram_url: event.artist.instagram_url,
+                                soundcloud_url: event.artist.soundcloud_url,
+                                twitter_url: event.artist.twitter_url,
+                                youtube_url: event.artist.youtube_url
+                            });
+                        } else {
+                            if (event.artist.id === params.get('artistId')) {
                                 resources.push({
                                     id: event.artist.id,
                                     title: event.artist.name,
@@ -257,24 +273,9 @@
                                     twitter_url: event.artist.twitter_url,
                                     youtube_url: event.artist.youtube_url
                                 });
-                            } else {
-                                if (event.artist.id === params.get('artistId')) {
-                                    resources.push({
-                                    id: event.artist.id,
-                                    title: event.artist.name,
-                                    description: event.artist.description,
-                                    image_url: event.artist.image_url,
-                                    genres: event.artist.genres,
-                                    url: event.artist.url,
-                                    facebook_url: event.artist.facebook_url,
-                                    instagram_url: event.artist.instagram_url,
-                                    soundcloud_url: event.artist.soundcloud_url,
-                                    twitter_url: event.artist.twitter_url,
-                                    youtube_url: event.artist.youtube_url
-                                });
-                                }
                             }
-                        
+                        }
+
                     }
                 })
 
@@ -315,17 +316,18 @@
                     resources: function (fetchInfo, successCallback, failureCallback) {
                         if (genreSelectorEl.value === '_all') {
                             successCallback(resources);
-                    } else {
-                        filteredResources = [];
-                        resources.forEach(resource => {
-                            if (resource.genres.indexOf(genreSelectorEl.value) >
-                                -1) {
-                                filteredResources.push(resource);
-                            }
-                        })
+                        } else {
+                            filteredResources = [];
+                            resources.forEach(resource => {
+                                if (resource.genres.indexOf(genreSelectorEl
+                                        .value) >
+                                    -1) {
+                                    filteredResources.push(resource);
+                                }
+                            })
 
-                        successCallback(filteredResources);
-                    }
+                            successCallback(filteredResources);
+                        }
                         // somethingAsynchonous({
                         //     start: fetchInfo.start,
                         //     end: fetchInfo.end,
@@ -351,8 +353,13 @@
                     },
 
                     eventRender: function (info) {
-                        var spacer = document.createElement('strong');
-                        spacer.innerText = ', ' + (info.event.extendedProps.livestream_url ? 'streaming live' : info.event.extendedProps.address); // = ', ';
+                        if (info.event.extendedProps.livestream_url || info.event.extendedProps.address) {
+                        var spacer = document.createElement('span');
+                        spacer.innerText = ', ';
+                        
+                        var location = document.createElement('span');
+                        location.className = 'eventLocationInfo';
+                        location.innerHTML = (info.event.extendedProps.livestream_url ? 'streaming live' : info.event.extendedProps.address)
 
                         // var navigationUrl = document.createElement('a');
                         // navigationUrl.setAttribute('target', '_blank');
@@ -365,11 +372,12 @@
                         //     navigationUrl.innerHTML = info.event.extendedProps.address;
                         //     navigationUrl.setAttribute('href', 'https://www.google.com/maps/dir/?api=1&destination=' + info.event.extendedProps.latitude + ',' + info.event.extendedProps.longitude);
                         // }
-                        
+
 
                         var titleEl = info.el.querySelector('.fc-title');
-                        titleEl.appendChild(spacer); // .appendChild(navigationUrl);
-                    },
+                        titleEl.appendChild(spacer).appendChild(location); // .appendChild(navigationUrl);
+                    }
+                },
 
                     // eventRender: function(info) {
                     //     var tooltip = new Tooltip(info.el, {
@@ -558,32 +566,39 @@
                         //     container: 'body'
                         // });
 
-                        var maxDescriptionLength = 200;
+                        if (info.resource.extendedProps.description) {
 
-                        var descriptionDiv = document.createElement('div');
-                        descriptionDiv.className = 'artist-description';
-                        var descriptionText = document.createElement('p');
-                        descriptionText.innerHTML = info.resource.extendedProps.description.substring(0, maxDescriptionLength);
+                            var maxDescriptionLength = 200;
 
-                        if (info.resource.extendedProps.description.length > maxDescriptionLength) {
-                            var readMore = document.createElement('span')
-                            readMore.innerHTML = '...(read more)';
+                            var descriptionDiv = document.createElement('div');
+                            descriptionDiv.className = 'artist-description';
+                            var descriptionText = document.createElement('p');
+                            descriptionText.innerHTML = info.resource.extendedProps
+                                .description.substring(0, maxDescriptionLength);
 
-                             var tooltip = new Tooltip(readMore, {
-                                title: info.resource.extendedProps.description,
-                                html: true,
-                                placement: 'top',
-                                trigger: 'hover',
-                                container: 'body'
-                            });
+                            if (info.resource.extendedProps.description.length >
+                                maxDescriptionLength) {
+                                var readMore = document.createElement('span')
+                                readMore.innerHTML = '...(read more)';
 
-                            descriptionText.appendChild(readMore);
+                                var tooltip = new Tooltip(readMore, {
+                                    title: info.resource.extendedProps
+                                        .description,
+                                    html: true,
+                                    placement: 'top',
+                                    trigger: 'hover',
+                                    container: 'body'
+                                });
 
+                                descriptionText.appendChild(readMore);
+
+                            }
+                        
+
+                            descriptionDiv.appendChild(descriptionText);
+
+                            artistProfileDetailsDiv.appendChild(descriptionDiv);
                         }
-
-                        descriptionDiv.appendChild(descriptionText);
-
-                        artistProfileDetailsDiv.appendChild(descriptionDiv);
 
                         var linksDiv = document.createElement('div');
                         // linksDiv.className = 'links';
@@ -596,7 +611,8 @@
                             icon.setAttribute('title', 'Artist Homepage');
 
                             var link = document.createElement('a');
-                            link.setAttribute('href', info.resource.extendedProps.url);
+                            link.setAttribute('href', info.resource.extendedProps
+                                .url);
                             link.setAttribute('target', '_blank');
 
                             link.appendChild(icon);
@@ -615,7 +631,8 @@
                             icon.setAttribute('title', 'Facebook');
 
                             var link = document.createElement('a');
-                            link.setAttribute('href', info.resource.extendedProps.facebook_url);
+                            link.setAttribute('href', info.resource.extendedProps
+                                .facebook_url);
                             link.setAttribute('target', '_blank');
 
                             link.appendChild(icon);
@@ -634,7 +651,8 @@
                             icon.setAttribute('title', 'Instagram');
 
                             var link = document.createElement('a');
-                            link.setAttribute('href', info.resource.extendedProps.instagram_url);
+                            link.setAttribute('href', info.resource.extendedProps
+                                .instagram_url);
                             link.setAttribute('target', '_blank');
 
                             link.appendChild(icon);
@@ -653,7 +671,8 @@
                             icon.setAttribute('title', 'SoundCloud');
 
                             var link = document.createElement('a');
-                            link.setAttribute('href', info.resource.extendedProps.soundcloud_url);
+                            link.setAttribute('href', info.resource.extendedProps
+                                .soundcloud_url);
                             link.setAttribute('target', '_blank');
 
                             link.appendChild(icon);
@@ -672,7 +691,8 @@
                             icon.setAttribute('title', 'Twitter');
 
                             var link = document.createElement('a');
-                            link.setAttribute('href', info.resource.extendedProps.twitter_url);
+                            link.setAttribute('href', info.resource.extendedProps
+                                .twitter_url);
                             link.setAttribute('target', '_blank');
 
                             link.appendChild(icon);
@@ -691,7 +711,8 @@
                             icon.setAttribute('title', 'YouTube');
 
                             var link = document.createElement('a');
-                            link.setAttribute('href', info.resource.extendedProps.youtube_url);
+                            link.setAttribute('href', info.resource.extendedProps
+                                .youtube_url);
                             link.setAttribute('target', '_blank');
 
                             link.appendChild(icon);
@@ -711,8 +732,9 @@
                 // when the timezone selector changes, dynamically change the calendar option
                 timeZoneSelectorEl.addEventListener('change', function () {
                     var newFirstTime = moment.utc(events[0].start).tz(this.value);
-                    
-                    calendar.setOption('minTime', newFirstTime.hours().toString() + ':00:00');
+
+                    calendar.setOption('minTime', newFirstTime.hours().toString() +
+                        ':00:00');
                     calendar.setOption('timeZone', this.value);
 
                     // calendar.render();
@@ -721,11 +743,11 @@
                 sortToggleButton.addEventListener('click', function () {
                     if (this.value === '') {
                         this.value = 'artist';
-                        this.innerHTML = 'Click to sort by event start time';
+                        this.innerHTML = 'Sort by start time';
                         calendar.setOption('resourceOrder', 'title');
                     } else {
                         this.value = '';
-                        this.innerHTML = 'Click to sort by artist name';
+                        this.innerHTML = 'Sort by artist';
                         calendar.setOption('resourceOrder', '');
                     }
                 })
