@@ -150,7 +150,7 @@
 
 
             $.ajax({
-                url: selectedCity.base_url + "/api/cities/events/simple",
+                url: selectedCity.base_url + "/api/cities/events/simple?per_page=1000",
                 method: "GET",
                 datatype: "json"
             }).done(function (response) {
