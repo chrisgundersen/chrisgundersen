@@ -9,7 +9,6 @@
     <script data-require="moment.js@*" data-semver="2.14.1" src="https://npmcdn.com/moment@2.14.1"></script>
     <script src="https://unpkg.com/@fullcalendar/core@4.4.0/main.min.js"></script>
     <script src="https://unpkg.com/@fullcalendar/interaction@4.4.0/main.min.js"></script>
-    <script src="https://unpkg.com/@fullcalendar/list@4.4.2/main.min.js"></script>
     <script src="https://unpkg.com/@fullcalendar/timeline@4.4.0/main.min.js"></script>
     <script src="https://unpkg.com/@fullcalendar/resource-common@4.4.0/main.min.js"></script>
     <script src="https://unpkg.com/@fullcalendar/resource-timeline@4.4.0/main.min.js"></script>
@@ -24,7 +23,6 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
     <link rel="stylesheet" href="https://unpkg.com/@fullcalendar/core@4.4.0/main.min.css" />
     <link rel="stylesheet" href="https://unpkg.com/@fullcalendar/timeline@4.4.0/main.min.css" />
-    <link rel="stylesheet" href="https://unpkg.com/@fullcalendar/list@4.4.2/main.min.css" />
     <link rel="stylesheet" href="https://unpkg.com/@fullcalendar/resource-timeline@4.4.0/main.min.css" />
     <link rel="stylesheet" href="css/schedule.css" />
 </head>
@@ -53,6 +51,10 @@
                 <!-- <option value='UTC'>UTC</option> -->
             </select>
         </div>
+    </div>
+
+    <div id='mobile-schedule-view-container' class='mobile-schedule-view-container'>
+
     </div>
     <!-- <div id='top'>
 
@@ -183,6 +185,7 @@
                             end: e.utc_end_time,
                             // title: e.venue.name,
                             title: e.artist.name + ' @ ' + e.venue.name,
+                            artist: e.artist,
                             resourceId: e.artist.id,
                             description: e.venue.description,
                             latitude: e.venue.latitude,
@@ -279,19 +282,200 @@
                         }
 
                     }
+
+                    
+
+                    
                 })
 
+                var mobileScheduleViewContainer = document.getElementById(
+                                        'mobile-schedule-view-container');
+
+                resources.forEach(artist => {
+                    
+
+                    var mobileArtistDiv = document.createElement('div');
+                    mobileArtistDiv.id = 'mobile-artist-' + artist.id;
+                    mobileArtistDiv.className = 'mobile-artist-div';
+
+                    var mobileArtistImage = document.createElement('img');
+                    mobileArtistImage.id = 'mobile-artist-img-' + artist.id;
+                    mobileArtistImage.className = 'mobile-artist-img';
+                    mobileArtistImage.setAttribute('src', (artist.image_url ?? selectedCity.logo_url));
+                    mobileArtistDiv.appendChild(mobileArtistImage);
+
+                    var mobileArtistName = document.createElement('span');
+                    mobileArtistName.id = 'mobile-artist-name-' + artist.id;
+                    mobileArtistName.className = 'mobile-artist-name';
+                    mobileArtistName.innerHTML = artist.title;
+                    mobileArtistDiv.appendChild(mobileArtistName);
+
+                    if (artist.genres) {
+                        var mobileArtistGenreDiv = document.createElement('div');
+                        mobileArtistGenreDiv.id = 'mobile-artist-genre-div-' + artist.id;
+                        mobileArtistGenreDiv.className = 'mobile-artist-genre-div';
+                        artist.genres.forEach(genre => {
+                            var mobileArtistGenre = document.createElement(
+                                'span');
+                            mobileArtistGenre.className = 'mobile-artist-genre';
+                            mobileArtistGenre.innerHTML = genre.replace(/_/gi, '/');;
+
+                            mobileArtistGenreDiv.appendChild(mobileArtistGenre);
+                        });
+
+                        mobileArtistDiv.appendChild(mobileArtistGenreDiv);
+                    }
+
+                    if (artist.description) {
+                        var mobileArtistDescription = document.createElement('p');
+                        mobileArtistDescription.innerHTML = artist.description;
+                        mobileArtistDiv.appendChild(mobileArtistDescription);
+                    }
+
+                    var mobileArtistLinksDiv = document.createElement('div');
+                    mobileArtistLinksDiv.id = 'mobile-artist-links-div=' + artist.id;
+                    mobileArtistLinksDiv.className = 'mobile-artist-links-div';
+
+                    if (artist.url) {
+                        var icon = document.createElement('i');
+                        icon.className = 'fa fa-link mobile-artist-link';
+                        icon.setAttribute('aria-hidden', true);
+                        icon.setAttribute('alt', 'Artist Homepage');
+                        icon.setAttribute('title', 'Artist Homepage');
+
+                        var link = document.createElement('a');
+                        link.setAttribute('href', artist.url);
+                        link.setAttribute('target', '_blank');
+
+                        link.appendChild(icon);
+
+                        mobileArtistLinksDiv.appendChild(link);
+                    }
+
+                    if (artist.facebook_url) {
+                        var icon = document.createElement('i');
+                        icon.className = 'fa fa-facebook mobile-artist-link';
+                        icon.setAttribute('aria-hidden', true);
+                        icon.setAttribute('alt', 'Facebook');
+                        icon.setAttribute('title', 'Facebook');
+
+                        var link = document.createElement('a');
+                        link.setAttribute('href', artist.facebook_url);
+                        link.setAttribute('target', '_blank');
+
+                        link.appendChild(icon);
+
+                        mobileArtistLinksDiv.appendChild(link);
+                    }
+
+                    if (artist.instagram_url) {
+                        var icon = document.createElement('i');
+                        icon.className = 'fa fa-instagram mobile-artist-link';
+                        icon.setAttribute('aria-hidden', true);
+                        icon.setAttribute('alt', 'Instagram');
+                        icon.setAttribute('title', 'Instagram');
+
+                        var link = document.createElement('a');
+                        link.setAttribute('href', artist.instagram_url);
+                        link.setAttribute('target', '_blank');
+
+                        link.appendChild(icon);
+
+                        mobileArtistLinksDiv.appendChild(link);
+                    }
+
+                    if (artist.soundcloud_url) {
+                        var icon = document.createElement('i');
+                        icon.className = 'fa fa-soundcloud mobile-artist-link';
+                        icon.setAttribute('aria-hidden', true);
+                        icon.setAttribute('alt', 'SoundCloud');
+                        icon.setAttribute('title', 'SoundCloud');
+
+                        var link = document.createElement('a');
+                        link.setAttribute('href', artist.soundcloud_url);
+                        link.setAttribute('target', '_blank');
+
+                        link.appendChild(icon);
+
+                        mobileArtistLinksDiv.appendChild(link);
+                    }
+
+                    if (artist.twitter_url) {
+                        var icon = document.createElement('i');
+                        icon.className = 'fa fa-twitter mobile-artist-link';
+                        icon.setAttribute('aria-hidden', true);
+                        icon.setAttribute('alt', 'Twitter');
+                        icon.setAttribute('title', 'Twitter');
+
+                        var link = document.createElement('a');
+                        link.setAttribute('href', artist.twitter_url);
+                        link.setAttribute('target', '_blank');
+
+                        link.appendChild(icon);
+
+                        mobileArtistLinksDiv.appendChild(link);
+                    }
+
+                    if (artist.youtube_url) {
+                        var icon = document.createElement('i');
+                        icon.className = 'fa fa-youtube mobile-artist-link';
+                        icon.setAttribute('aria-hidden', true);
+                        icon.setAttribute('alt', 'YouTube');
+                        icon.setAttribute('title', 'YouTube');
+
+                        var link = document.createElement('a');
+                        link.setAttribute('href', artist.youtube_url);
+                        link.setAttribute('target', '_blank');
+
+                        link.appendChild(icon);
+
+                        mobileArtistLinksDiv.appendChild(link);
+                    }
+
+                    mobileArtistDiv.appendChild(mobileArtistLinksDiv);
+
+                    var artistEvents = events.filter(function (e) {
+                        return e.resourceId == artist.id;
+                    });
+
+                    if (artistEvents) {
+                        var mobileArtistEventDiv = document.createElement('div');
+                        mobileArtistEventDiv.id = 'mobile-artist-event-div-' + artist.id;
+                        mobileArtistEventDiv.className = 'mobile-artist-event-div';
+
+                        artistEvents.forEach(evt => {
+                            var momentStart = moment(evt.start);
+                            var momentEnd = moment(evt.end);
+                            var artistEvent = document.createElement('a');
+                            artistEvent.id = 'mobile-artist-event-id-' + evt.id;
+                            artistEvent.className = 'mobile-artist-event';
+                            artistEvent.innerHTML = momentStart.tz('America/New_York').format('ha') + '-' + momentEnd.tz('America/New_York').format('ha') + ' ' + momentStart.tz('America/New_York').format('z') + ': ' + evt.title;
+                            artistEvent.setAttribute('href', evt.url);
+                            artistEvent.setAttribute('target', '_blank');
+
+                            mobileArtistEventDiv.appendChild(artistEvent);
+                        });
+
+                        mobileArtistDiv.appendChild(mobileArtistEventDiv);
+                    }
+
+                    mobileScheduleViewContainer.appendChild(mobileArtistDiv);
+                });
+
+                
+
+                var timeZoneSelectorEl = document.getElementById(
+                    'mobile-schedule-view-container');
+
                 var calendar = new FullCalendar.Calendar(calendarEl, {
-                    // plugins: ['resourceTimeline', 'momentTimezone'],
-                    // // header: {
-                    // //     left: 'today prev,next',
-                    // //     center: 'title',
-                    // //     right: 'resourceTimelineDay,resourceTimelineWeek'
-                    // // },
-                    // defaultView: 'resourceTimelineDay',
+                    plugins: ['resourceTimeline', 'momentTimezone'],
+                    // header: {
+                    //     left: 'today prev,next',
+                    //     center: 'title',
+                    //     right: 'resourceTimelineDay,resourceTimelineWeek'
+                    // },
+                    defaultView: 'resourceTimelineDay',
                     // defaultView: 'timelineDay',
-                    plugins: [ 'list', 'resourceTimeline', 'momentTimezone'],
-                    defaultView: 'listDay',
                     defaultDate: currentYear + '-06-21',
                     displayEventTime: true,
                     eventOrder: 'start',
@@ -357,33 +541,35 @@
                     },
 
                     eventRender: function (info) {
-                        if (info.event.extendedProps.livestream_url || info.event.extendedProps.address) {
-                        var spacer = document.createElement('span');
-                        spacer.innerText = ', ';
-                        
-                        var location = document.createElement('span');
-                        location.className = 'eventLocationInfo';
-                        location.innerHTML = (info.event.extendedProps.livestream_url ? 'streaming live' : info.event.extendedProps.address)
+                        if (info.event.extendedProps.livestream_url || info.event
+                            .extendedProps.address) {
+                            var spacer = document.createElement('span');
+                            spacer.innerText = ', ';
 
-                        // var navigationUrl = document.createElement('a');
-                        // navigationUrl.setAttribute('target', '_blank');
-                        // navigationUrl.className = 'navigationUrl';
+                            var location = document.createElement('span');
+                            location.className = 'eventLocationInfo';
+                            location.innerHTML = (info.event.extendedProps
+                                .livestream_url ? 'streaming live' : info.event
+                                .extendedProps.address)
 
-                        // if (info.event.extendedProps.livestream_url) {
-                        //     navigationUrl.innerHTML = 'streaming live';
-                        //     navigationUrl.setAttribute('href', info.event.extendedProps.livestream_url);
-                        // } else {
-                        //     navigationUrl.innerHTML = info.event.extendedProps.address;
-                        //     navigationUrl.setAttribute('href', 'https://www.google.com/maps/dir/?api=1&destination=' + info.event.extendedProps.latitude + ',' + info.event.extendedProps.longitude);
-                        // }
+                            // var navigationUrl = document.createElement('a');
+                            // navigationUrl.setAttribute('target', '_blank');
+                            // navigationUrl.className = 'navigationUrl';
+
+                            // if (info.event.extendedProps.livestream_url) {
+                            //     navigationUrl.innerHTML = 'streaming live';
+                            //     navigationUrl.setAttribute('href', info.event.extendedProps.livestream_url);
+                            // } else {
+                            //     navigationUrl.innerHTML = info.event.extendedProps.address;
+                            //     navigationUrl.setAttribute('href', 'https://www.google.com/maps/dir/?api=1&destination=' + info.event.extendedProps.latitude + ',' + info.event.extendedProps.longitude);
+                            // }
 
 
-                        var titleEl = info.el.querySelector('.fc-title');
-                        if (titleEl) {
-                        titleEl.appendChild(spacer).appendChild(location); // .appendChild(navigationUrl);
+                            var titleEl = info.el.querySelector('.fc-title');
+                            titleEl.appendChild(spacer).appendChild(
+                            location); // .appendChild(navigationUrl);
                         }
-                    }
-                },
+                    },
 
                     // eventRender: function(info) {
                     //     var tooltip = new Tooltip(info.el, {
@@ -599,7 +785,7 @@
                                 descriptionText.appendChild(readMore);
 
                             }
-                        
+
 
                             descriptionDiv.appendChild(descriptionText);
 
