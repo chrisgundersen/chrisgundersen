@@ -24,7 +24,7 @@
     <link rel="stylesheet" href="https://unpkg.com/@fullcalendar/core@4.4.0/main.min.css" />
     <link rel="stylesheet" href="https://unpkg.com/@fullcalendar/timeline@4.4.0/main.min.css" />
     <link rel="stylesheet" href="https://unpkg.com/@fullcalendar/resource-timeline@4.4.0/main.min.css" />
-    <link rel="stylesheet" href="css/schedule.css" />
+    <link rel="stylesheet" href="css/styles.css" />
 </head>
 
 <body>
@@ -69,7 +69,6 @@
 
         <div style='clear:both'></div>
     </div> -->
-
     <div id='calendar'></div>
 </body>
 
@@ -355,8 +354,8 @@
                     eventRender: function (info) {
                         if (info.event.extendedProps.livestream_url || info.event.extendedProps.address) {
                         var spacer = document.createElement('span');
-                        spacer.innerText = ', ';
-                        
+                        spacer.innerText = ' ';
+
                         var location = document.createElement('span');
                         location.className = 'eventLocationInfo';
                         location.innerHTML = (info.event.extendedProps.livestream_url ? 'streaming live' : info.event.extendedProps.address)
@@ -579,7 +578,7 @@
                             if (info.resource.extendedProps.description.length >
                                 maxDescriptionLength) {
                                 var readMore = document.createElement('span')
-                                readMore.innerHTML = '...(read more)';
+                                readMore.innerHTML = '... (read more)';
 
                                 var tooltip = new Tooltip(readMore, {
                                     title: info.resource.extendedProps
@@ -593,7 +592,7 @@
                                 descriptionText.appendChild(readMore);
 
                             }
-                        
+
 
                             descriptionDiv.appendChild(descriptionText);
 
@@ -601,7 +600,7 @@
                         }
 
                         var linksDiv = document.createElement('div');
-                        // linksDiv.className = 'links';
+                            linksDiv.className = 'links';
 
                         if (info.resource.extendedProps.url) {
                             var icon = document.createElement('i');
