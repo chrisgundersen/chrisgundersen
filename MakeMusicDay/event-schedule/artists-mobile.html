@@ -24,7 +24,7 @@
     <link rel="stylesheet" href="https://unpkg.com/@fullcalendar/core@4.4.0/main.min.css" />
     <link rel="stylesheet" href="https://unpkg.com/@fullcalendar/timeline@4.4.0/main.min.css" />
     <link rel="stylesheet" href="https://unpkg.com/@fullcalendar/resource-timeline@4.4.0/main.min.css" />
-    <link rel="stylesheet" href="css/schedule.css" />
+    <link rel="stylesheet" href="css/styles.css" />
 </head>
 
 <body>
@@ -283,16 +283,16 @@
 
                     }
 
-                    
 
-                    
+
+
                 })
 
                 var mobileScheduleViewContainer = document.getElementById(
                                         'mobile-schedule-view-container');
 
                 resources.forEach(artist => {
-                    
+
 
                     var mobileArtistDiv = document.createElement('div');
                     mobileArtistDiv.id = 'mobile-artist-' + artist.id;
@@ -462,7 +462,7 @@
                     mobileScheduleViewContainer.appendChild(mobileArtistDiv);
                 });
 
-                
+
 
                 var timeZoneSelectorEl = document.getElementById(
                     'mobile-schedule-view-container');
