@@ -193,6 +193,8 @@
                         });
                     } else {
                         if (params.get('artistId') === e.artist.id) {
+                            document.body.classList.add("single-artist-schedule");
+                            
                             events.push({
                                 start: e.utc_start_time,
                                 end: e.utc_end_time,
