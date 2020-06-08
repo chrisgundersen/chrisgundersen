@@ -78,7 +78,7 @@
                     });
                 });
             }).then(function () {
-
+                /*
                 var loops = Math.ceil(cities.length / maxBatchSize);
 
                 var i;
@@ -132,11 +132,12 @@
 
                     if (a.city > b.city) return 1;
                     if (a.city < b.city) return -1;
-                });
+                });*/
 
                 $.each(cities, function (idx, e) {
-                    var spacer = document.createElement('strong');
-                    spacer.innerHTML = ' | ';
+                    // var spacer = document.createElement('strong');
+                    // spacer.innerHTML = ' | ';
+                    var cityId = e.id;
                     var cityDiv = document.createElement('div');
                     cityDiv.id = 'div_' + e.id;
                     cityDiv.className = 'city';
@@ -148,13 +149,13 @@
 
                     cityDiv.appendChild(cityNameLink);
 
-                    var cityState = document.createElement('a')
-                    cityState.setAttribute('href',
-                        'https://www.google.com/maps/search/?api=1&query=' + e.latitude +
-                        ',' + e.longitude);
-                    cityState.setAttribute('target', '_blank');
-                    cityState.innerHTML = e.city + ', ' + e.state;
-                    cityDiv.appendChild(spacer).appendChild(cityState);
+                    // var cityState = document.createElement('a')
+                    // cityState.setAttribute('href',
+                    //     'https://www.google.com/maps/search/?api=1&query=' + e.latitude +
+                    //     ',' + e.longitude);
+                    // cityState.setAttribute('target', '_blank');
+                    // cityState.innerHTML = e.city + ', ' + e.state;
+                    // cityDiv.appendChild(spacer).appendChild(cityState);
 
                     var cityArtistScheduleButton = document.createElement('button');
                     cityArtistScheduleButton.innerHTML = 'Get Artist Schedule URL';
@@ -163,17 +164,53 @@
                     }, false);
 
                     cityDiv.appendChild(cityArtistScheduleButton);
+                    
 
+                    var artistLinksDiv = document.createElement('div');
+                    artistLinksDiv.id = 'artists-links-city-id-' + e.id;
 
-                    // var cityMap = document.createElement('img');
-                    // cityMap.src = 'https://www.google.com/maps/@?api=1&map_action=map&center=' + e.latitude + ',' + e.longitude + '&zoom=' + e.map_zoom_level;
+                    // var spacer = document.createElement('br');
+                    // spacer.innerHTML = ' | ';
 
-                    // cityDiv.appendChild(cityMap);
+                    $.ajax({
+                        async: false,
+                        url: e.base_url + "/api/cities/events/simple?per_page=1000",
+                        method: "GET",
+                        datatype: "json"
+                    }).done(function (response) {
+                        // Parse response into resource and event objects for FullCalendar
+                        // var resources = [];
+
+                        $.each(response.events, function (idx, e) {
+                            var spacer = document.createElement('strong');
+                            spacer.innerHTML = ' | ';
+                            var artistScheduleLink = document.createElement(
+                                'a');
+                            artistScheduleLink.innerHTML = e.artist.name +
+                                ' @ ' + e.venue.name;
+                            artistScheduleLink.setAttribute('href',
+                                'https://chrisgundersen.github.io/MakeMusicDay/event-schedule/artists.html?cityId=' +
+                                cityId + '&artistId=' + e.artist.id);
+                            artistScheduleLink.setAttribute('target', '_blank');
+
+                            cityDiv.appendChild(
+                                artistScheduleLink);
+                        });
+
+                        // cityDiv.appendChild(artistLinksDiv);
+                        // var cityMap = document.createElement('img');
+                        // cityMap.src = 'https://www.google.com/maps/@?api=1&map_action=map&center=' + e.latitude + ',' + e.longitude + '&zoom=' + e.map_zoom_level;
+
+                        // cityDiv.appendChild(cityMap);
+                        
+                        
+                    });
 
                     citiesEl.appendChild(cityDiv);
-                })
+
+                });
             });
-        });
+        })
     </script>
 </head>
 
