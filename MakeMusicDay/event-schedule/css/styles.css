@@ -466,6 +466,17 @@ derived from this CSS on this page: https://popper.js.org/tooltip-examples.html
     margin-right: 0;
 }
 
+
+@media screen and (min-width:700px) {
+  .single-artist-schedule .fc-resource-area.fc-widget-content .fc-scroller, .single-artist-schedule .fc-time-area.fc-widget-content .fc-scroller {
+    height: 450px !important;
+  }
+
+  .single-artist-schedule .timeZoneDiv {
+    margin: 0 !important;
+  }
+}
+
 /* meta styles */
 
 #cities {
