@@ -73,223 +73,24 @@
 
         <div style='clear:both'></div>
     </div> -->
-
     <div id='calendar'></div>
 </body>
 
 <script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function () {
-        var timeZoneSelectorEl = document.getElementById('time-zone-selector');
-        var toggleSortDiv = document.getElementById('sortDiv');
-        var sortToggleButton = document.getElementById('toggleSort');
-        var genreSelectorEl = document.getElementById('genre-selector');
-        var genreSelectorDiv = document.getElementById('genreDiv');
-        var loadingEl = document.getElementById('loading');
-        // var cityNameEl = document.getElementById('cityName');
-        // var contactUsEl = document.getElementById('contact-us');
-        var params = new URLSearchParams(window.location.search);
-        // var b = moment.utc("2013-11-18 11:55").tz("America/Toronto");
-        var currentYear = new Date().getFullYear();
-        var firstEvent;
+var musicGenres = [];
 
-        var musicGenres = [];
+var cities = [];
+var selectedCity;
+var events = [];
+var resources = [];
+var filteredResources = [];
+var timeZoneGuess = moment.tz.guess();
 
-        var cities = [];
-        var events = [];
-        var resources = [];
-        var filteredResources = [];
+    function loadMobileView (resources, events, selectedCity, timeZone) {
+        var mobileScheduleViewContainer = document.getElementById(
+                    'mobile-schedule-view-container');
 
-        if (params.has('artistId')) {
-            toggleSortDiv.hidden = true;
-            genreSelectorDiv.hidden = true;
-        }
-
-        $.ajax({
-            url: "https://ny.makemusicday.org/api/cities",
-            method: "GET",
-            datatype: "json"
-        }).done(function (response) {
-            $.each(response, function (idx, e) {
-                cities.push({
-                    accent_color: e.accent_color,
-                    base_url: e.base_url,
-                    contact_us_url: e.contact_us_url,
-                    id: e.id,
-                    logo_url: e.logo_url,
-                    latitude: e.latitude,
-                    longitude: e.longitude,
-                    name: e.name,
-                    primary_button_color: e.primary_button_color,
-                    secondary_button_color: e.secondary_button_color,
-                    timezone: e.timezone,
-                    url: e.url
-                });
-            });
-        }).then(function () {
-            var selectedCityId =
-                "18aba1da-fd86-4884-91aa-a9c71636db0d"; // New York City in prod
-            // "1f0e5787-bf54-4fcd-b414-63a9b7494692" // "09439b48-377b-469c-9a9c-a05b294d537e"; // Test city, will be overwritten if real param is supplied
-
-            if (params.has('cityId')) {
-                selectedCityId = params.get('cityId');
-            }
-
-            var selectedCity = cities.find(({
-                id
-            }) => id === selectedCityId);
-            // cityNameEl.innerHTML = selectedCity.name;
-            // contactUsEl.setAttribute('href', selectedCity.contact_us_url);
-
-            var timeZoneGuess = moment.tz.guess();
-
-            var timeZoneGuessOption = document.createElement('option');
-            timeZoneGuessOption.text = 'Your local timezone (best guess: "' + timeZoneGuess + '")';
-            timeZoneGuessOption.value = timeZoneGuess;
-            timeZoneGuessOption.selected = true;
-            timeZoneSelectorEl.add(timeZoneGuessOption);
-
-
-
-
-
-
-            $.ajax({
-                url: selectedCity.base_url + "/api/cities/events/simple?per_page=1000",
-                method: "GET",
-                datatype: "json"
-            }).done(function (response) {
-                // Parse response into resource and event objects for FullCalendar
-                // var resources = [];
-
-                $.each(response.events, function (idx, e) {
-                    if (!params.has('artistId')) {
-                        e.artist.genres.forEach(genre => {
-                            if (musicGenres.indexOf(genre) == -1) {
-                                musicGenres.push(genre);
-                            }
-                        });
-                        // resources.push({
-                        //     id: e.artist.name,
-                        //     title: e.artist.name,
-                        //     description: e.artist.description,
-                        //     facebook_url: e.artist.facebook_url,
-                        //     image_url: e.artist.image_url,
-                        //     instagram_url: e.artist.instagram_url,
-                        //     soundcloud_url: e.artist.soundcloud_url,
-                        //     twitter_url: e.artist.twitter_url,
-                        //     url: e.artist.url,
-                        //     youtube_url: e.artist.youtube_url
-                        // });
-                        events.push({
-                            start: e.utc_start_time,
-                            end: e.utc_end_time,
-                            // title: e.venue.name,
-                            title: e.artist.name + ' @ ' + e.venue.name,
-                            artist: e.artist,
-                            resourceId: e.artist.id,
-                            description: e.venue.description,
-                            latitude: e.venue.latitude,
-                            longitude: e.venue.longitude,
-                            artist: e.artist,
-                            address: e.venue.address,
-                            livestream_url: e.livestream_url,
-                            url: e.livestream_url ??
-                                'https://www.google.com/maps/dir/?api=1&destination=' +
-                                e.venue.latitude + ',' + e.venue.longitude
-                        });
-                    } else {
-                        if (params.get('artistId') === e.artist.id) {
-                            events.push({
-                                start: e.utc_start_time,
-                                end: e.utc_end_time,
-                                // title: e.venue.name,
-                                title: e.artist.name + ' @ ' + e.venue.name,
-                                resourceId: e.artist.id,
-                                description: e.venue.description,
-                                latitude: e.venue.latitude,
-                                longitude: e.venue.longitude,
-                                artist: e.artist,
-                                address: e.venue.address,
-                                livestream_url: e.livestream_url,
-                                url: e.livestream_url ??
-                                    'https://www.google.com/maps/dir/?api=1&destination=' +
-                                    e.venue.latitude + ',' + e.venue.longitude
-                            });
-                        }
-                    }
-                });
-
-                if (!params.has('artistId')) {
-
-                    // resources = resources.sort((a, b) => (a.title > b.title) ? 1 : -1)
-                    musicGenres = musicGenres.sort();
-
-                    var genreDiv = document.getElementById("genres");
-
-                    for (var i = 0; i < musicGenres.length; i++) {
-                        var genreOption = document.createElement('option');
-                        genreOption.text = musicGenres[i].replace(/_/gi, '/');
-                        genreOption.value = musicGenres[i];
-                        genreSelectorEl.add(genreOption);
-                    }
-
-                }
-
-                events = events.sort((a, b) => (a.start > b.start) ? 1 : -1)
-                firstEvent = moment.utc(events[0].start);
-                firstEvent.tz(timeZoneGuess);
-
-                // var firstTime = firstEvent.start.toString().substring(11, 13);
-
-                var calendarEl = document.getElementById('calendar');
-
-                var resources = [];
-
-                events.forEach(event => {
-                    if (!resources.find(({
-                            id
-                        }) => id == event.artist.id)) {
-                        if (!params.has('artistId')) {
-                            resources.push({
-                                id: event.artist.id,
-                                title: event.artist.name,
-                                description: event.artist.description,
-                                image_url: event.artist.image_url,
-                                genres: event.artist.genres,
-                                url: event.artist.url,
-                                facebook_url: event.artist.facebook_url,
-                                instagram_url: event.artist.instagram_url,
-                                soundcloud_url: event.artist.soundcloud_url,
-                                twitter_url: event.artist.twitter_url,
-                                youtube_url: event.artist.youtube_url
-                            });
-                        } else {
-                            if (event.artist.id === params.get('artistId')) {
-                                resources.push({
-                                    id: event.artist.id,
-                                    title: event.artist.name,
-                                    description: event.artist.description,
-                                    image_url: event.artist.image_url,
-                                    genres: event.artist.genres,
-                                    url: event.artist.url,
-                                    facebook_url: event.artist.facebook_url,
-                                    instagram_url: event.artist.instagram_url,
-                                    soundcloud_url: event.artist.soundcloud_url,
-                                    twitter_url: event.artist.twitter_url,
-                                    youtube_url: event.artist.youtube_url
-                                });
-                            }
-                        }
-
-                    }
-
-
-
-
-                })
-
-                var mobileScheduleViewContainer = document.getElementById(
-                                        'mobile-schedule-view-container');
+                    $('#mobile-schedule-view-container').empty();
 
                 resources.forEach(artist => {
 
@@ -301,7 +102,8 @@
                     var mobileArtistImage = document.createElement('img');
                     mobileArtistImage.id = 'mobile-artist-img-' + artist.id;
                     mobileArtistImage.className = 'mobile-artist-img';
-                    mobileArtistImage.setAttribute('src', (artist.image_url ?? selectedCity.logo_url));
+                    mobileArtistImage.setAttribute('src', (artist.image_url ??
+                        selectedCity.logo_url));
                     mobileArtistDiv.appendChild(mobileArtistImage);
 
                     var mobileArtistName = document.createElement('span');
@@ -312,13 +114,15 @@
 
                     if (artist.genres) {
                         var mobileArtistGenreDiv = document.createElement('div');
-                        mobileArtistGenreDiv.id = 'mobile-artist-genre-div-' + artist.id;
+                        mobileArtistGenreDiv.id = 'mobile-artist-genre-div-' + artist
+                        .id;
                         mobileArtistGenreDiv.className = 'mobile-artist-genre-div';
                         artist.genres.forEach(genre => {
                             var mobileArtistGenre = document.createElement(
                                 'span');
                             mobileArtistGenre.className = 'mobile-artist-genre';
-                            mobileArtistGenre.innerHTML = genre.replace(/_/gi, '/');;
+                            mobileArtistGenre.innerHTML = genre.replace(/_/gi,
+                                '/');;
 
                             mobileArtistGenreDiv.appendChild(mobileArtistGenre);
                         });
@@ -440,18 +244,24 @@
 
                     if (artistEvents) {
                         var mobileArtistEventDiv = document.createElement('div');
-                        mobileArtistEventDiv.id = 'mobile-artist-event-div-' + artist.id;
+                        mobileArtistEventDiv.id = 'mobile-artist-event-div-' + artist
+                        .id;
                         mobileArtistEventDiv.className = 'mobile-artist-event-div';
 
                         artistEvents.forEach(evt => {
-                            var momentStart = moment(evt.start);
-                            var momentEnd = moment(evt.end);
+                            var momentStart = moment.utc(evt.start);
+                            var momentEnd = moment.utc(evt.end);
                             var artistEvent = document.createElement('a');
                             artistEvent.id = 'mobile-artist-event-id-' + evt.id;
                             artistEvent.className = 'mobile-artist-event';
-                            artistEvent.innerHTML = momentStart.tz('America/New_York').format('ha') + '-' + momentEnd.tz('America/New_York').format('ha') + ' ' + momentStart.tz('America/New_York').format('z') + ': ' + evt.title;
+                            artistEvent.innerHTML = momentStart.tz(timeZone).format('ha') + '-' +
+                                momentEnd.tz(timeZone).format('ha') +
+                                ' ' + momentStart.tz(timeZone).format(
+                                    'z') + ': ' + evt.title;
                             artistEvent.setAttribute('href', evt.url);
                             artistEvent.setAttribute('target', '_blank');
+                            artistEvent.setAttribute('data-utc-start', momentStart.utc());
+                            artistEvent.setAttribute('data-utc-end', momentEnd.utc());
 
                             mobileArtistEventDiv.appendChild(artistEvent);
                         });
@@ -460,14 +270,220 @@
                     }
 
                     mobileScheduleViewContainer.appendChild(mobileArtistDiv);
+                });    
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var timeZoneSelectorEl = document.getElementById('time-zone-selector');
+        var toggleSortDiv = document.getElementById('sortDiv');
+        var sortToggleButton = document.getElementById('toggleSort');
+        var genreSelectorEl = document.getElementById('genre-selector');
+        var genreSelectorDiv = document.getElementById('genreDiv');
+        var loadingEl = document.getElementById('loading');
+        // var cityNameEl = document.getElementById('cityName');
+        // var contactUsEl = document.getElementById('contact-us');
+        var params = new URLSearchParams(window.location.search);
+        // var b = moment.utc("2013-11-18 11:55").tz("America/Toronto");
+        var currentYear = new Date().getFullYear();
+        var firstEvent;
+
+        
+
+        if (params.has('artistId')) {
+            toggleSortDiv.hidden = true;
+            genreSelectorDiv.hidden = true;
+        }
+
+        $.ajax({
+            url: "https://ny.makemusicday.org/api/cities",
+            method: "GET",
+            datatype: "json"
+        }).done(function (response) {
+            $.each(response, function (idx, e) {
+                cities.push({
+                    accent_color: e.accent_color,
+                    base_url: e.base_url,
+                    contact_us_url: e.contact_us_url,
+                    id: e.id,
+                    logo_url: e.logo_url,
+                    latitude: e.latitude,
+                    longitude: e.longitude,
+                    name: e.name,
+                    primary_button_color: e.primary_button_color,
+                    secondary_button_color: e.secondary_button_color,
+                    timezone: e.timezone,
+                    url: e.url
+                });
+            });
+        }).then(function () {
+            var selectedCityId =
+                "18aba1da-fd86-4884-91aa-a9c71636db0d"; // New York City in prod
+            // "1f0e5787-bf54-4fcd-b414-63a9b7494692" // "09439b48-377b-469c-9a9c-a05b294d537e"; // Test city, will be overwritten if real param is supplied
+
+            if (params.has('cityId')) {
+                selectedCityId = params.get('cityId');
+            }
+
+            var selectedCity = cities.find(({
+                id
+            }) => id === selectedCityId);
+            // cityNameEl.innerHTML = selectedCity.name;
+            // contactUsEl.setAttribute('href', selectedCity.contact_us_url);
+
+            
+
+            var timeZoneGuessOption = document.createElement('option');
+            timeZoneGuessOption.text = 'Your local timezone (best guess: "' + timeZoneGuess + '")';
+            timeZoneGuessOption.value = timeZoneGuess;
+            timeZoneGuessOption.selected = true;
+            timeZoneSelectorEl.add(timeZoneGuessOption);
+
+
+
+
+
+
+            $.ajax({
+                url: selectedCity.base_url + "/api/cities/events/simple?per_page=1000",
+                method: "GET",
+                datatype: "json"
+            }).done(function (response) {
+                // Parse response into resource and event objects for FullCalendar
+                // var resources = [];
+
+                $.each(response.events, function (idx, e) {
+                    if (!params.has('artistId')) {
+                        e.artist.genres.forEach(genre => {
+                            if (musicGenres.indexOf(genre) == -1) {
+                                musicGenres.push(genre);
+                            }
+                        });
+                        // resources.push({
+                        //     id: e.artist.name,
+                        //     title: e.artist.name,
+                        //     description: e.artist.description,
+                        //     facebook_url: e.artist.facebook_url,
+                        //     image_url: e.artist.image_url,
+                        //     instagram_url: e.artist.instagram_url,
+                        //     soundcloud_url: e.artist.soundcloud_url,
+                        //     twitter_url: e.artist.twitter_url,
+                        //     url: e.artist.url,
+                        //     youtube_url: e.artist.youtube_url
+                        // });
+                        events.push({
+                            start: e.utc_start_time,
+                            end: e.utc_end_time,
+                            // title: e.venue.name,
+                            title: e.artist.name + ' @ ' + e.venue.name,
+                            artist: e.artist,
+                            resourceId: e.artist.id,
+                            description: e.venue.description,
+                            latitude: e.venue.latitude,
+                            longitude: e.venue.longitude,
+                            artist: e.artist,
+                            address: e.venue.address,
+                            livestream_url: e.livestream_url,
+                            url: e.livestream_url ??
+                                'https://www.google.com/maps/dir/?api=1&destination=' +
+                                e.venue.latitude + ',' + e.venue.longitude
+                        });
+                    } else {
+                        if (params.get('artistId') === e.artist.id) {
+                            document.body.classList.add("single-artist-schedule");
+
+                            events.push({
+                                start: e.utc_start_time,
+                                end: e.utc_end_time,
+                                // title: e.venue.name,
+                                title: e.artist.name + ' @ ' + e.venue.name,
+                                resourceId: e.artist.id,
+                                description: e.venue.description,
+                                latitude: e.venue.latitude,
+                                longitude: e.venue.longitude,
+                                artist: e.artist,
+                                address: e.venue.address,
+                                livestream_url: e.livestream_url,
+                                url: e.livestream_url ??
+                                    'https://www.google.com/maps/dir/?api=1&destination=' +
+                                    e.venue.latitude + ',' + e.venue.longitude
+                            });
+                        }
+                    }
                 });
 
+                if (!params.has('artistId')) {
+
+                    // resources = resources.sort((a, b) => (a.title > b.title) ? 1 : -1)
+                    musicGenres = musicGenres.sort();
+
+                    var genreDiv = document.getElementById("genres");
+
+                    for (var i = 0; i < musicGenres.length; i++) {
+                        var genreOption = document.createElement('option');
+                        genreOption.text = musicGenres[i].replace(/_/gi, '/');
+                        genreOption.value = musicGenres[i];
+                        genreSelectorEl.add(genreOption);
+                    }
+
+                }
+
+                events = events.sort((a, b) => (a.start > b.start) ? 1 : -1)
+                firstEvent = moment.utc(events[0].start);
+                firstEvent.tz(timeZoneGuess);
+
+                // var firstTime = firstEvent.start.toString().substring(11, 13);
+
+                var calendarEl = document.getElementById('calendar');
+
+                var resources = [];
+
+                events.forEach(event => {
+                    if (!resources.find(({
+                            id
+                        }) => id == event.artist.id)) {
+                        if (!params.has('artistId')) {
+                            resources.push({
+                                id: event.artist.id,
+                                title: event.artist.name,
+                                description: event.artist.description,
+                                image_url: event.artist.image_url,
+                                genres: event.artist.genres,
+                                url: event.artist.url,
+                                facebook_url: event.artist.facebook_url,
+                                instagram_url: event.artist.instagram_url,
+                                soundcloud_url: event.artist.soundcloud_url,
+                                twitter_url: event.artist.twitter_url,
+                                youtube_url: event.artist.youtube_url
+                            });
+                        } else {
+                            if (event.artist.id === params.get('artistId')) {
+                                resources.push({
+                                    id: event.artist.id,
+                                    title: event.artist.name,
+                                    description: event.artist.description,
+                                    image_url: event.artist.image_url,
+                                    genres: event.artist.genres,
+                                    url: event.artist.url,
+                                    facebook_url: event.artist.facebook_url,
+                                    instagram_url: event.artist.instagram_url,
+                                    soundcloud_url: event.artist.soundcloud_url,
+                                    twitter_url: event.artist.twitter_url,
+                                    youtube_url: event.artist.youtube_url
+                                });
+                            }
+                        }
+
+                    }
+                })
+
+                
+                loadMobileView(resources, events, selectedCity, timeZoneGuess);
 
 
                 var timeZoneSelectorEl = document.getElementById(
                     'mobile-schedule-view-container');
-
                 var calendar = new FullCalendar.Calendar(calendarEl, {
+                    schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
                     plugins: ['resourceTimeline', 'momentTimezone'],
                     // header: {
                     //     left: 'today prev,next',
@@ -771,7 +787,7 @@
                             if (info.resource.extendedProps.description.length >
                                 maxDescriptionLength) {
                                 var readMore = document.createElement('span')
-                                readMore.innerHTML = '...(read more)';
+                                readMore.innerHTML = '... (read more)';
 
                                 var tooltip = new Tooltip(readMore, {
                                     title: info.resource.extendedProps
@@ -793,7 +809,7 @@
                         }
 
                         var linksDiv = document.createElement('div');
-                        // linksDiv.className = 'links';
+                        linksDiv.className = 'links';
 
                         if (info.resource.extendedProps.url) {
                             var icon = document.createElement('i');
@@ -921,16 +937,27 @@
 
                 calendar.render();
 
-                // when the timezone selector changes, dynamically change the calendar option
-                timeZoneSelectorEl.addEventListener('change', function () {
+                $(document).on('change','#time-zone-selector', function () {
                     var newFirstTime = moment.utc(events[0].start).tz(this.value);
+
+                    var res = getResourcesFilteredByGenre();
+                    loadMobileView(res, events, selectedCity, this.value);
 
                     calendar.setOption('minTime', newFirstTime.hours().toString() +
                         ':00:00');
                     calendar.setOption('timeZone', this.value);
-
-                    // calendar.render();
                 });
+
+                // when the timezone selector changes, dynamically change the calendar option
+                // timeZoneSelectorEl.addEventListener('change', function () {
+                //     var newFirstTime = moment.utc(events[0].start).tz(this.value);
+
+                //     calendar.setOption('minTime', newFirstTime.hours().toString() +
+                //         ':00:00');
+                //     calendar.setOption('timeZone', this.value);
+
+                //     // calendar.render();
+                // });
 
                 sortToggleButton.addEventListener('click', function () {
                     if (this.value === '') {
@@ -948,21 +975,26 @@
                     if (genreSelectorEl.value === '_all') {
                         return resources;
                     } else {
-                        var tmpRes = [];
+                        return resources.filter(function (e) { if (e.genres && e.genres.includes(genreSelectorEl.value)) { return e; }});
+                        // var tmpRes = [];
 
-                        resources.forEach(resource => {
-                            if (!resource.genre.includes(({
-                                    genre
-                                }) => genre == genreSelectorEl.value)) {
-                                tmpRes.push(resource);
-                            }
+                        // resources.forEach(resource => {
+                        //     if (!resource.genres.includes(({
+                        //             genre
+                        //         }) => genre == genreSelectorEl.value)) {
+                        //         tmpRes.push(resource);
+                        //     }
 
-                            return tmpRes;
-                        })
+                            
+                        // });
+
+                        // return tmpRes;
                     }
                 }
 
                 genreSelectorEl.addEventListener('change', function () {
+                    var res = getResourcesFilteredByGenre();
+                    loadMobileView(res, events, selectedCity, timeZoneSelectorEl.value);
                     // if (genreSelectorEl.value === '_all') {
                     //     calendar.setOption('resources', resources);
                     // } else {
