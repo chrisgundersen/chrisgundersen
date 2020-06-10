@@ -53,7 +53,7 @@
             var maxBatchSize = 100;
 
             $.ajax({
-                async: false,
+                // async: false,
                 url: "https://ny.makemusicday.org/api/cities",
                 method: "GET",
                 datatype: "json"
@@ -145,7 +145,7 @@
                     var cityNameLink = document.createElement('a');
                     cityNameLink.setAttribute('href', e.url);
                     cityNameLink.setAttribute('target', '_blank');
-                    cityNameLink.innerHTML = e.name;
+                    cityNameLink.innerHTML = e.name + ' (Time Zone: ' + e.timezone + ')';
 
                     cityDiv.appendChild(cityNameLink);
 
@@ -173,7 +173,7 @@
                     // spacer.innerHTML = ' | ';
 
                     $.ajax({
-                        async: false,
+                        // async: false,
                         url: e.base_url + "/api/cities/events/simple?per_page=1000",
                         method: "GET",
                         datatype: "json"
