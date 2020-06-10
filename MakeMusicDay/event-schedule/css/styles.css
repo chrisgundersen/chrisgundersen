@@ -257,7 +257,7 @@ body {
   #calendar {
     display: none;
   }
-  
+
   .header-grid {
     flex-direction: column;
     padding: 20px;
@@ -269,7 +269,11 @@ body {
     width: 100%;
   }
 
-  #sortDiv, #genreDiv {
+  #sortDiv {
+    display: none;
+  }
+
+  #genreDiv {
     margin-bottom: 1em;
   }
 
@@ -469,7 +473,7 @@ derived from this CSS on this page: https://popper.js.org/tooltip-examples.html
 
 @media screen and (min-width:700px) {
   .single-artist-schedule .fc-resource-area.fc-widget-content .fc-scroller, .single-artist-schedule .fc-time-area.fc-widget-content .fc-scroller {
-    height: 450px !important;
+    height: auto !important;
   }
 
   .single-artist-schedule .timeZoneDiv {
