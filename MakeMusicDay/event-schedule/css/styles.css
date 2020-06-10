@@ -257,7 +257,7 @@ body {
   #calendar {
     display: none;
   }
-  
+
   .header-grid {
     flex-direction: column;
     padding: 20px;
@@ -269,7 +269,11 @@ body {
     width: 100%;
   }
 
-  #sortDiv, #genreDiv {
+  #sortDiv {
+    display: none;
+  }
+
+  #genreDiv {
     margin-bottom: 1em;
   }
 
