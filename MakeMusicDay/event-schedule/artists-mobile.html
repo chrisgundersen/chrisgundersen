@@ -994,8 +994,9 @@ var timeZoneGuess = moment.tz.guess();
 
                 genreSelectorEl.addEventListener('change', function () {
                     var res = getResourcesFilteredByGenre();
-                    loadMobileView(res, events, selectedCity, timeZoneSelectorEl.value);
-                    // if (genreSelectorEl.value === '_all') {
+                    var timezone = $("#time-zone-selector").val();
+                    loadMobileView(res, events, selectedCity, timezone);
+                    // if (genreSelectorEl.value === '_all') 
                     //     calendar.setOption('resources', resources);
                     // } else {
                     //     filteredResources = [];
