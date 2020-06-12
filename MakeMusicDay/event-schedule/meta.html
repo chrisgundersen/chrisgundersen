@@ -164,10 +164,20 @@
                     }, false);
 
                     cityDiv.appendChild(cityArtistScheduleButton);
+
+                    var cityVenueScheduleButton = document.createElement('button');
+                    cityVenueScheduleButton.innerHTML = 'Get Venue Schedule URL';
+                    cityVenueScheduleButton.addEventListener('click', function () {
+                        copyCityLinkToClipboard(e.id, 'venues');
+                    }, false);
+
+                    cityDiv.appendChild(cityVenueScheduleButton);
                     
 
                     var artistLinksDiv = document.createElement('div');
                     artistLinksDiv.id = 'artists-links-city-id-' + e.id;
+
+                    cityDiv.appendChild(artistLinksDiv);
 
                     // var spacer = document.createElement('br');
                     // spacer.innerHTML = ' | ';
@@ -183,19 +193,35 @@
 
                         $.each(response.events, function (idx, e) {
                             var spacer = document.createElement('strong');
-                            spacer.innerHTML = ' | ';
+                            spacer.innerHTML = 'Event: ';
+
+                            var atSign = document.createElement('strong');
+                            atSign.innerText = ' @ ';
+                            
                             var artistScheduleLink = document.createElement(
                                 'a');
-                            artistScheduleLink.innerHTML = e.artist.name +
-                                ' @ ' + e.venue.name;
+                            artistScheduleLink.innerHTML = 'Artist: ' + e.artist.name;
                             artistScheduleLink.setAttribute('href',
                                 'https://chrisgundersen.github.io/MakeMusicDay/event-schedule/artists.html?cityId=' +
                                 cityId + '&artistId=' + e.artist.id);
                             artistScheduleLink.setAttribute('target', '_blank');
 
-                            cityDiv.appendChild(
-                                artistScheduleLink);
+                            var venueScheduleLink = document.createElement(
+                                'a');
+                                venueScheduleLink.innerHTML = 'Venue: ' + e.venue.name;
+                                venueScheduleLink.setAttribute('href',
+                                'https://chrisgundersen.github.io/MakeMusicDay/event-schedule/venues.html?cityId=' +
+                                cityId + '&venueId=' + e.venue.id);
+                                venueScheduleLink.setAttribute('target', '_blank');
+
+                                // artistLinksDiv.appendChild(spacer) //
+                                cityDiv.appendChild(artistScheduleLink); //.appendChild(atSign)
+                                cityDiv.appendChild(venueScheduleLink);
+
+                                
                         });
+
+                        // cityDiv.appendChild(artistLinksDiv);
 
                         // cityDiv.appendChild(artistLinksDiv);
                         // var cityMap = document.createElement('img');
