@@ -52,6 +52,10 @@
             </select>
         </div>
     </div>
+
+    <div id='mobile-schedule-view-container' class='mobile-schedule-view-container'>
+
+    </div>
     <!-- <div id='top'>
 
         <div style='float:left'>
@@ -73,6 +77,202 @@
 </body>
 
 <script type="text/javascript">
+var musicGenres = [];
+
+var cities = [];
+var selectedCity;
+var events = [];
+var resources = [];
+var filteredResources = [];
+var timeZoneGuess = moment.tz.guess();
+
+    function loadMobileView (resources, events, selectedCity, timeZone) {
+        var mobileScheduleViewContainer = document.getElementById(
+                    'mobile-schedule-view-container');
+
+                    $('#mobile-schedule-view-container').empty();
+
+                resources.forEach(artist => {
+
+
+                    var mobileArtistDiv = document.createElement('div');
+                    mobileArtistDiv.id = 'mobile-artist-' + artist.id;
+                    mobileArtistDiv.className = 'mobile-artist-div';
+
+                    var mobileArtistImage = document.createElement('img');
+                    mobileArtistImage.id = 'mobile-artist-img-' + artist.id;
+                    mobileArtistImage.className = 'mobile-artist-img';
+                    mobileArtistImage.setAttribute('src', (artist.image_url ??
+                        selectedCity.logo_url));
+                    mobileArtistDiv.appendChild(mobileArtistImage);
+
+                    var mobileArtistName = document.createElement('span');
+                    mobileArtistName.id = 'mobile-artist-name-' + artist.id;
+                    mobileArtistName.className = 'mobile-artist-name';
+                    mobileArtistName.innerHTML = artist.title;
+                    mobileArtistDiv.appendChild(mobileArtistName);
+
+                    if (artist.genres) {
+                        var mobileArtistGenreDiv = document.createElement('div');
+                        mobileArtistGenreDiv.id = 'mobile-artist-genre-div-' + artist
+                        .id;
+                        mobileArtistGenreDiv.className = 'mobile-artist-genre-div';
+                        artist.genres.forEach(genre => {
+                            var mobileArtistGenre = document.createElement(
+                                'span');
+                            mobileArtistGenre.className = 'mobile-artist-genre';
+                            mobileArtistGenre.innerHTML = genre.replace(/_/gi,
+                                '/');;
+
+                            mobileArtistGenreDiv.appendChild(mobileArtistGenre);
+                        });
+
+                        mobileArtistDiv.appendChild(mobileArtistGenreDiv);
+                    }
+
+                    if (artist.description) {
+                        var mobileArtistDescription = document.createElement('p');
+                        mobileArtistDescription.innerHTML = artist.description;
+                        mobileArtistDiv.appendChild(mobileArtistDescription);
+                    }
+
+                    var mobileArtistLinksDiv = document.createElement('div');
+                    mobileArtistLinksDiv.id = 'mobile-artist-links-div=' + artist.id;
+                    mobileArtistLinksDiv.className = 'mobile-artist-links-div';
+
+                    if (artist.url) {
+                        var icon = document.createElement('i');
+                        icon.className = 'fa fa-link mobile-artist-link';
+                        icon.setAttribute('aria-hidden', true);
+                        icon.setAttribute('alt', 'Artist Homepage');
+                        icon.setAttribute('title', 'Artist Homepage');
+
+                        var link = document.createElement('a');
+                        link.setAttribute('href', artist.url);
+                        link.setAttribute('target', '_blank');
+
+                        link.appendChild(icon);
+
+                        mobileArtistLinksDiv.appendChild(link);
+                    }
+
+                    if (artist.facebook_url) {
+                        var icon = document.createElement('i');
+                        icon.className = 'fa fa-facebook mobile-artist-link';
+                        icon.setAttribute('aria-hidden', true);
+                        icon.setAttribute('alt', 'Facebook');
+                        icon.setAttribute('title', 'Facebook');
+
+                        var link = document.createElement('a');
+                        link.setAttribute('href', artist.facebook_url);
+                        link.setAttribute('target', '_blank');
+
+                        link.appendChild(icon);
+
+                        mobileArtistLinksDiv.appendChild(link);
+                    }
+
+                    if (artist.instagram_url) {
+                        var icon = document.createElement('i');
+                        icon.className = 'fa fa-instagram mobile-artist-link';
+                        icon.setAttribute('aria-hidden', true);
+                        icon.setAttribute('alt', 'Instagram');
+                        icon.setAttribute('title', 'Instagram');
+
+                        var link = document.createElement('a');
+                        link.setAttribute('href', artist.instagram_url);
+                        link.setAttribute('target', '_blank');
+
+                        link.appendChild(icon);
+
+                        mobileArtistLinksDiv.appendChild(link);
+                    }
+
+                    if (artist.soundcloud_url) {
+                        var icon = document.createElement('i');
+                        icon.className = 'fa fa-soundcloud mobile-artist-link';
+                        icon.setAttribute('aria-hidden', true);
+                        icon.setAttribute('alt', 'SoundCloud');
+                        icon.setAttribute('title', 'SoundCloud');
+
+                        var link = document.createElement('a');
+                        link.setAttribute('href', artist.soundcloud_url);
+                        link.setAttribute('target', '_blank');
+
+                        link.appendChild(icon);
+
+                        mobileArtistLinksDiv.appendChild(link);
+                    }
+
+                    if (artist.twitter_url) {
+                        var icon = document.createElement('i');
+                        icon.className = 'fa fa-twitter mobile-artist-link';
+                        icon.setAttribute('aria-hidden', true);
+                        icon.setAttribute('alt', 'Twitter');
+                        icon.setAttribute('title', 'Twitter');
+
+                        var link = document.createElement('a');
+                        link.setAttribute('href', artist.twitter_url);
+                        link.setAttribute('target', '_blank');
+
+                        link.appendChild(icon);
+
+                        mobileArtistLinksDiv.appendChild(link);
+                    }
+
+                    if (artist.youtube_url) {
+                        var icon = document.createElement('i');
+                        icon.className = 'fa fa-youtube mobile-artist-link';
+                        icon.setAttribute('aria-hidden', true);
+                        icon.setAttribute('alt', 'YouTube');
+                        icon.setAttribute('title', 'YouTube');
+
+                        var link = document.createElement('a');
+                        link.setAttribute('href', artist.youtube_url);
+                        link.setAttribute('target', '_blank');
+
+                        link.appendChild(icon);
+
+                        mobileArtistLinksDiv.appendChild(link);
+                    }
+
+                    mobileArtistDiv.appendChild(mobileArtistLinksDiv);
+
+                    var artistEvents = events.filter(function (e) {
+                        return e.resourceId == artist.id;
+                    });
+
+                    if (artistEvents) {
+                        var mobileArtistEventDiv = document.createElement('div');
+                        mobileArtistEventDiv.id = 'mobile-artist-event-div-' + artist
+                        .id;
+                        mobileArtistEventDiv.className = 'mobile-artist-event-div';
+
+                        artistEvents.forEach(evt => {
+                            var momentStart = moment.utc(evt.start);
+                            var momentEnd = moment.utc(evt.end);
+                            var artistEvent = document.createElement('a');
+                            artistEvent.id = 'mobile-artist-event-id-' + evt.id;
+                            artistEvent.className = 'mobile-artist-event';
+                            artistEvent.innerHTML = momentStart.tz(timeZone).format('ha') + '-' +
+                                momentEnd.tz(timeZone).format('ha') +
+                                ' ' + momentStart.tz(timeZone).format(
+                                    'z') + ': ' + evt.title;
+                            artistEvent.setAttribute('href', evt.url);
+                            artistEvent.setAttribute('target', '_blank');
+                            artistEvent.setAttribute('data-utc-start', momentStart.utc());
+                            artistEvent.setAttribute('data-utc-end', momentEnd.utc());
+
+                            mobileArtistEventDiv.appendChild(artistEvent);
+                        });
+
+                        mobileArtistDiv.appendChild(mobileArtistEventDiv);
+                    }
+
+                    mobileScheduleViewContainer.appendChild(mobileArtistDiv);
+                });    
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         var timeZoneSelectorEl = document.getElementById('time-zone-selector');
         var toggleSortDiv = document.getElementById('sortDiv');
@@ -87,12 +287,7 @@
         var currentYear = new Date().getFullYear();
         var firstEvent;
 
-        var musicGenres = [];
-
-        var cities = [];
-        var events = [];
-        var resources = [];
-        var filteredResources = [];
+        
 
         if (params.has('artistId')) {
             toggleSortDiv.hidden = true;
@@ -135,7 +330,7 @@
             // cityNameEl.innerHTML = selectedCity.name;
             // contactUsEl.setAttribute('href', selectedCity.contact_us_url);
 
-            var timeZoneGuess = moment.tz.guess();
+            
 
             var timeZoneGuessOption = document.createElement('option');
             timeZoneGuessOption.text = 'Your local timezone (best guess: "' + timeZoneGuess + '")';
@@ -180,6 +375,7 @@
                             end: e.utc_end_time,
                             // title: e.venue.name,
                             title: e.artist.name + ' @ ' + e.venue.name,
+                            artist: e.artist,
                             resourceId: e.artist.id,
                             description: e.venue.description,
                             latitude: e.venue.latitude,
@@ -194,7 +390,7 @@
                     } else {
                         if (params.get('artistId') === e.artist.id) {
                             document.body.classList.add("single-artist-schedule");
-                            
+
                             events.push({
                                 start: e.utc_start_time,
                                 end: e.utc_end_time,
@@ -280,6 +476,12 @@
                     }
                 })
 
+                
+                loadMobileView(resources, events, selectedCity, timeZoneGuess);
+
+
+                var timeZoneSelectorEl = document.getElementById(
+                    'mobile-schedule-view-container');
                 var calendar = new FullCalendar.Calendar(calendarEl, {
                     schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
                     plugins: ['resourceTimeline', 'momentTimezone'],
@@ -355,31 +557,35 @@
                     },
 
                     eventRender: function (info) {
-                        if (info.event.extendedProps.livestream_url || info.event.extendedProps.address) {
-                        var spacer = document.createElement('span');
-                        spacer.innerText = ' ';
+                        if (info.event.extendedProps.livestream_url || info.event
+                            .extendedProps.address) {
+                            var spacer = document.createElement('span');
+                            spacer.innerText = ' ';
 
-                        var location = document.createElement('span');
-                        location.className = 'eventLocationInfo';
-                        location.innerHTML = (info.event.extendedProps.livestream_url ? 'streaming live' : info.event.extendedProps.address)
+                            var location = document.createElement('span');
+                            location.className = 'eventLocationInfo';
+                            location.innerHTML = (info.event.extendedProps
+                                .livestream_url ? 'streaming live' : info.event
+                                .extendedProps.address)
 
-                        // var navigationUrl = document.createElement('a');
-                        // navigationUrl.setAttribute('target', '_blank');
-                        // navigationUrl.className = 'navigationUrl';
+                            // var navigationUrl = document.createElement('a');
+                            // navigationUrl.setAttribute('target', '_blank');
+                            // navigationUrl.className = 'navigationUrl';
 
-                        // if (info.event.extendedProps.livestream_url) {
-                        //     navigationUrl.innerHTML = 'streaming live';
-                        //     navigationUrl.setAttribute('href', info.event.extendedProps.livestream_url);
-                        // } else {
-                        //     navigationUrl.innerHTML = info.event.extendedProps.address;
-                        //     navigationUrl.setAttribute('href', 'https://www.google.com/maps/dir/?api=1&destination=' + info.event.extendedProps.latitude + ',' + info.event.extendedProps.longitude);
-                        // }
+                            // if (info.event.extendedProps.livestream_url) {
+                            //     navigationUrl.innerHTML = 'streaming live';
+                            //     navigationUrl.setAttribute('href', info.event.extendedProps.livestream_url);
+                            // } else {
+                            //     navigationUrl.innerHTML = info.event.extendedProps.address;
+                            //     navigationUrl.setAttribute('href', 'https://www.google.com/maps/dir/?api=1&destination=' + info.event.extendedProps.latitude + ',' + info.event.extendedProps.longitude);
+                            // }
 
 
-                        var titleEl = info.el.querySelector('.fc-title');
-                        titleEl.appendChild(spacer).appendChild(location); // .appendChild(navigationUrl);
-                    }
-                },
+                            var titleEl = info.el.querySelector('.fc-title');
+                            titleEl.appendChild(spacer).appendChild(
+                            location); // .appendChild(navigationUrl);
+                        }
+                    },
 
                     // eventRender: function(info) {
                     //     var tooltip = new Tooltip(info.el, {
@@ -603,7 +809,7 @@
                         }
 
                         var linksDiv = document.createElement('div');
-                            linksDiv.className = 'links';
+                        linksDiv.className = 'links';
 
                         if (info.resource.extendedProps.url) {
                             var icon = document.createElement('i');
@@ -731,16 +937,27 @@
 
                 calendar.render();
 
-                // when the timezone selector changes, dynamically change the calendar option
-                timeZoneSelectorEl.addEventListener('change', function () {
+                $(document).on('change','#time-zone-selector', function () {
                     var newFirstTime = moment.utc(events[0].start).tz(this.value);
+
+                    var res = getResourcesFilteredByGenre();
+                    loadMobileView(res, events, selectedCity, this.value);
 
                     calendar.setOption('minTime', newFirstTime.hours().toString() +
                         ':00:00');
                     calendar.setOption('timeZone', this.value);
-
-                    // calendar.render();
                 });
+
+                // when the timezone selector changes, dynamically change the calendar option
+                // timeZoneSelectorEl.addEventListener('change', function () {
+                //     var newFirstTime = moment.utc(events[0].start).tz(this.value);
+
+                //     calendar.setOption('minTime', newFirstTime.hours().toString() +
+                //         ':00:00');
+                //     calendar.setOption('timeZone', this.value);
+
+                //     // calendar.render();
+                // });
 
                 sortToggleButton.addEventListener('click', function () {
                     if (this.value === '') {
@@ -758,22 +975,28 @@
                     if (genreSelectorEl.value === '_all') {
                         return resources;
                     } else {
-                        var tmpRes = [];
+                        return resources.filter(function (e) { if (e.genres && e.genres.includes(genreSelectorEl.value)) { return e; }});
+                        // var tmpRes = [];
 
-                        resources.forEach(resource => {
-                            if (!resource.genre.includes(({
-                                    genre
-                                }) => genre == genreSelectorEl.value)) {
-                                tmpRes.push(resource);
-                            }
+                        // resources.forEach(resource => {
+                        //     if (!resource.genres.includes(({
+                        //             genre
+                        //         }) => genre == genreSelectorEl.value)) {
+                        //         tmpRes.push(resource);
+                        //     }
 
-                            return tmpRes;
-                        })
+                            
+                        // });
+
+                        // return tmpRes;
                     }
                 }
 
                 genreSelectorEl.addEventListener('change', function () {
-                    // if (genreSelectorEl.value === '_all') {
+                    var res = getResourcesFilteredByGenre();
+                    var timezone = $("#time-zone-selector").val();
+                    loadMobileView(res, events, selectedCity, timezone);
+                    // if (genreSelectorEl.value === '_all') 
                     //     calendar.setOption('resources', resources);
                     // } else {
                     //     filteredResources = [];
