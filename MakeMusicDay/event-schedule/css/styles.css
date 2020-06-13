@@ -372,7 +372,7 @@ derived from this CSS on this page: https://popper.js.org/tooltip-examples.html
 }
 
 .tooltip {
-  max-width: 370px;
+  left: 75px !important;
 }
 
 .style5 .tooltip {
