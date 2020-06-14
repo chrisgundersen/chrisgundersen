@@ -270,7 +270,7 @@ var timeZoneGuess = moment.tz.guess();
                     }
 
                     mobileScheduleViewContainer.appendChild(mobileArtistDiv);
-                });    
+                });
     }
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -287,7 +287,7 @@ var timeZoneGuess = moment.tz.guess();
         var currentYear = new Date().getFullYear();
         var firstEvent;
 
-        
+
 
         if (params.has('artistId')) {
             toggleSortDiv.hidden = true;
@@ -330,7 +330,7 @@ var timeZoneGuess = moment.tz.guess();
             // cityNameEl.innerHTML = selectedCity.name;
             // contactUsEl.setAttribute('href', selectedCity.contact_us_url);
 
-            
+
 
             var timeZoneGuessOption = document.createElement('option');
             timeZoneGuessOption.text = 'Your local timezone (best guess: "' + timeZoneGuess + '")';
@@ -373,7 +373,6 @@ var timeZoneGuess = moment.tz.guess();
                         events.push({
                             start: e.utc_start_time,
                             end: e.utc_end_time,
-                            // title: e.venue.name,
                             title: e.artist.name + ' @ ' + e.venue.name,
                             artist: e.artist,
                             resourceId: e.artist.id,
@@ -476,7 +475,7 @@ var timeZoneGuess = moment.tz.guess();
                     }
                 })
 
-                
+
                 loadMobileView(resources, events, selectedCity, timeZoneGuess);
 
 
@@ -586,7 +585,7 @@ var timeZoneGuess = moment.tz.guess();
                             var start = moment(info.event.start);
                             var end = moment(info.event.end);
 
-                            if (end.diff(start, 'minutes') <= 60) {
+                            if (end.diff(start, 'minutes') <= 50) {
                                 titleEl.classList.add('short-event');
                             }
 
@@ -992,7 +991,7 @@ var timeZoneGuess = moment.tz.guess();
                         //         tmpRes.push(resource);
                         //     }
 
-                            
+
                         // });
 
                         // return tmpRes;
@@ -1003,7 +1002,7 @@ var timeZoneGuess = moment.tz.guess();
                     var res = getResourcesFilteredByGenre();
                     var timezone = $("#time-zone-selector").val();
                     loadMobileView(res, events, selectedCity, timezone);
-                    // if (genreSelectorEl.value === '_all') 
+                    // if (genreSelectorEl.value === '_all')
                     //     calendar.setOption('resources', resources);
                     // } else {
                     //     filteredResources = [];
