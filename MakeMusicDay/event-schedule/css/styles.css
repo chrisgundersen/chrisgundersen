@@ -32,6 +32,15 @@ body {
     height: 120px;
 }
 
+.short-event {
+  color: rgba(0,0,0,0.8);
+  position: absolute !important;
+  padding-top: 1em;
+  left: 110% !important;
+  min-width: 290px !important;
+  max-width: 500px !important;
+}
+
 .navigationUrl {
     color: #FFFFFF;
 }
@@ -76,8 +85,9 @@ body {
 
 .fc-timeline-event .fc-title {
   display: block;
-  font-size: 1.4em;
+  font-size: 1.2em;
   font-weight: bold;
+  max-width: 500px;
 }
 
 .fc-timeline-event .fc-title span {
@@ -373,6 +383,8 @@ derived from this CSS on this page: https://popper.js.org/tooltip-examples.html
 
 .tooltip {
   left: 75px !important;
+  max-height: 420px;
+  overflow: scroll;
 }
 
 .style5 .tooltip {
