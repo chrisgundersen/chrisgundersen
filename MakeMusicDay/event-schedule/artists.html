@@ -582,8 +582,15 @@ var timeZoneGuess = moment.tz.guess();
 
 
                             var titleEl = info.el.querySelector('.fc-title');
-                            titleEl.appendChild(spacer).appendChild(
-                            location); // .appendChild(navigationUrl);
+
+                            var start = moment(info.event.start);
+                            var end = moment(info.event.end);
+
+                            if (end.diff(start, 'minutes') <= 60) {
+                                titleEl.classList.add('short-event');
+                            }
+
+                            titleEl.appendChild(spacer).appendChild(location); // .appendChild(navigationUrl);
                         }
                     },
 
