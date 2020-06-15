@@ -556,6 +556,8 @@ var timeZoneGuess = moment.tz.guess();
                     },
 
                     eventRender: function (info) {
+                        var titleEl = info.el.querySelector('.fc-title');
+
                         if (info.event.extendedProps.livestream_url || info.event
                             .extendedProps.address) {
                             var spacer = document.createElement('span');
@@ -579,17 +581,14 @@ var timeZoneGuess = moment.tz.guess();
                             //     navigationUrl.setAttribute('href', 'https://www.google.com/maps/dir/?api=1&destination=' + info.event.extendedProps.latitude + ',' + info.event.extendedProps.longitude);
                             // }
 
-
-                            var titleEl = info.el.querySelector('.fc-title');
-
-                            var start = moment(info.event.start);
-                            var end = moment(info.event.end);
-
-                            if (end.diff(start, 'minutes') <= 50) {
-                                titleEl.classList.add('short-event');
-                            }
-
                             titleEl.appendChild(spacer).appendChild(location); // .appendChild(navigationUrl);
+                        }
+
+                        var start = moment(info.event.start);
+                        var end = moment(info.event.end);
+
+                        if (end.diff(start, 'minutes') <= 50) {
+                            titleEl.classList.add('short-event');
                         }
                     },
 
